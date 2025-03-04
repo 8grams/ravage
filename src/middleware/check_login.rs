@@ -1,8 +1,9 @@
 use actix_session::Session;
+use actix_session::SessionExt;
 use actix_web::{
-    Error, FromRequest,
+    Error,
     body::{BoxBody, EitherBody},
-    dev::{Payload, Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
+    dev::{Service, ServiceRequest, ServiceResponse, Transform, forward_ready},
     http::{
         StatusCode,
         header::{self, HeaderValue},
@@ -60,10 +61,9 @@ where
             } else {
                 let res: ServiceResponse<B> = fut.await?;
                 let request = res.request();
-                let mut payload: Payload = Payload::None;
-                let session: Session = Session::from_request(request, &mut payload).await.unwrap();
+                let session: Session = request.get_session();
                 let session_json = session.get::<serde_json::Value>("session").unwrap();
-                if session_json.is_some() {
+                if session_json.is_none() {
                     return Ok(res.map_body(|head, body| {
                         head.status = StatusCode::FOUND;
                         head.headers_mut()

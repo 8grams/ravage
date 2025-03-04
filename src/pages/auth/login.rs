@@ -20,6 +20,7 @@ pub async fn login_authentication(
         let _ = session.insert("session", json!({ "username": username }));
         return HttpResponse::Found()
             .append_header(("Location", "/"))
+            .append_header(("Hx-Location", "/"))
             .body("Ok");
     }
 

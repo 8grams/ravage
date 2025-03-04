@@ -30,11 +30,11 @@ pub async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(logger)
+            .wrap(middleware::check_login::CheckLogin)
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
                 secret_key,
             ))
-            .wrap(middleware::check_login::CheckLogin)
             .app_data(web::Data::new(AppState {
                 tera: tera_tmpl.clone(),
                 pool: pool.clone(),
