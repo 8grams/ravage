@@ -2,5 +2,5 @@
 .env
 db
 tailwindcss
-static/app.css
+static/
 node_modules

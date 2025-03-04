@@ -17,7 +17,6 @@ RUN apt install lld clang -y
 FROM basenode AS nodebase
 WORKDIR /app
 COPY ./templates ./templates
-COPY ./static ./static
 COPY ./tailwind.config.js ./tailwind.config.js
 COPY ./package.json ./package.json
 RUN pnpm install
@@ -30,8 +29,7 @@ ENV UID=10001
 RUN adduser --disabled-password --gecos "" --home "/nonexistent" --shell "/sbin/nologin" --no-create-home --uid "${UID}" "${USER}"
 WORKDIR /app
 COPY . .
-COPY --from=nodebase /app/app.css ./static/dist/app.css
-COPY --from=nodebase /app/static/dist ./static/dist
+COPY --from=nodebase /app/static/* ./static/
 
 ARG BUILD_TIMESTAMP
 ENV BUILD_TIMESTAMP=${BUILD_TIMESTAMP}
