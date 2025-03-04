@@ -20,6 +20,8 @@ pub async fn main() -> std::io::Result<()> {
     let pool = conn::sqlite_pool();
 
     let tera_tmpl = embed::load_templates().unwrap();
+    let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
+    let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
     let server = HttpServer::new(move || {
         let logger = Logger::default();
         let secret_key = Key::from(
@@ -50,9 +52,11 @@ pub async fn main() -> std::io::Result<()> {
             .default_service(web::get().to(pages::error_404::main))
     })
     .bind((
-        env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string()),
-        8080,
+        server_address.as_str(),
+        server_port.parse::<u16>().unwrap(),
     ))?
     .run();
+    println!("Please to run pnpm dev, if you run this with bacon");
+    println!("Started http server: http://{}:{}", server_address, server_port);
     server.await
 }
