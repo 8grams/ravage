@@ -34,15 +34,15 @@ COPY --from=nodebase /app/static/* ./static/
 ARG BUILD_TIMESTAMP
 ENV BUILD_TIMESTAMP=${BUILD_TIMESTAMP}
 RUN RUSTFLAGS="-C target-cpu=native" cargo build --release --locked
-RUN strip -s target/release/core_actix
-CMD ["/app/target/release/core_actix"]
+RUN strip -s target/release/ravage
+CMD ["/app/target/release/ravage"]
 
 # final outcome
 FROM gcr.io/distroless/cc-debian12
 WORKDIR /app
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
-COPY --from=builder /app/target/release/core_actix ./
+COPY --from=builder /app/target/release/ravage ./
 COPY --from=builder /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/
 EXPOSE 8080
-CMD ["./core_actix"]
+CMD ["./ravage"]
