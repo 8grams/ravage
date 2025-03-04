@@ -11,6 +11,7 @@ use std::env;
 mod app_state;
 pub mod conn;
 mod embed;
+mod middleware;
 mod pages;
 
 #[actix_web::main]
@@ -29,6 +30,7 @@ pub async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(logger)
+            .wrap(middleware::check_login::CheckLogin)
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
                 secret_key,
