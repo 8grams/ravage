@@ -1,0 +1,31 @@
+{% extends "base/base_app.html" %} {% block content %}
+<main class="flex flex-col items-center justify-center w-full min-h-screen">
+  <section class="container mx-auto">
+    <form action="/auth/login" method="post" class="mx-auto max-w-96 space-y-6">
+      <label class="floating-label">
+        <span>Username</span>
+        <input
+          type="text"
+          placeholder="Username"
+          class="input w-full validator"
+          required
+        />
+        <div class="validator-hint text-xs">Username required</div>
+      </label>
+      <label class="floating-label">
+        <span>Password</span>
+        <input
+          type="password"
+          placeholder="Password"
+          class="input validator w-full"
+          required
+        />
+        <div class="validator-hint text-xs">Password required</div>
+      </label>
+      <div class="text-end">
+        <input type="submit" value="Login" class="btn btn-primary" />
+      </div>
+    </form>
+  </section>
+</main>
+{% endblock %}

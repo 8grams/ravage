@@ -1,0 +1,9 @@
+[package]
+name = "ravage"
+version = "0.1.0-alpha"
+edition = "2024"
+
+[dependencies]
+actix-web = "4"
+tera = "1"
+dotenv = "0.15.0"
