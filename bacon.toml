@@ -79,7 +79,8 @@ command = [
 need_stdout = true
 allow_warnings = true
 background = true
-watch = ["src", "templates", "static/app.css"]
+on_change_strategy = "kill_then_restart"
+watch = ["templates"]
 
 # Run your long-running application (eg server) and have the result displayed in bacon.
 # For programs that never stop (eg a server), `background` is set to false
@@ -99,6 +100,7 @@ need_stdout = true
 allow_warnings = true
 background = false
 on_change_strategy = "kill_then_restart"
+watch = ["templates"]
 
 # This parameterized job runs the example of your choice, as soon
 # as the code compiles.
