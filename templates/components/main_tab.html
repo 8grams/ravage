@@ -10,7 +10,11 @@
     aria-label="Request"
     checked="checked"
   />
-  <div class="tab-content border-base-300 bg-base-100 p-10">Tab content 2</div>
+  <div class="tab-content border-base-300 bg-base-100 p-10">
+    {% include "components/request_form.html" %}
+    <div class="divider"></div>
+    {% include "components/request_history.html" %}
+  </div>
 
   <input type="radio" name="my_tabs_2" class="tab" aria-label="Another Tab" />
   <div class="tab-content border-base-300 bg-base-100 p-10">Tab content 3</div>
