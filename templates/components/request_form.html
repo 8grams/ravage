@@ -1,0 +1,69 @@
+<form>
+  <div class="text-end">
+    <button class="btn btn-neutral">Save</button>
+    <button class="btn btn-primary">Run</button>
+  </div>
+  <div class="mt-8 space-y-4">
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Request Name</legend>
+      <input type="text" class="input w-full" placeholder="Request Name" />
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Path</legend>
+      <div class="flex gap-2">
+        <input type="text" class="input w-full" placeholder="/api/request" />
+        <select class="select w-max" required>
+          <option disabled selected>METHOD</option>
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>PATCH</option>
+          <option>DELETE</option>
+        </select>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Headers</legend>
+      <div class="flex gap-2">
+        <input type="text" class="input w-full" placeholder="Key" />
+        <input type="text" class="input w-full" placeholder="Value" />
+        <button type="button" class="btn btn-square">
+          <span class="material-symbols-rounded"> delete </span>
+        </button>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Body</legend>
+      <div class="flex gap-4">
+        <label>
+          <input
+            type="radio"
+            name="radio-3"
+            class="radio radio-sm radio-neutral"
+            checked="checked"
+          />
+          <span>JSON</span>
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="radio-3"
+            class="radio radio-sm radio-neutral"
+          />
+          <span>Form Data</span>
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="radio-3"
+            class="radio radio-sm radio-neutral"
+          />
+          <span>Query Params</span>
+        </label>
+      </div>
+      <div class="mt-4">
+        <textarea class="textarea w-full" rows="5" placeholder="..."></textarea>
+      </div>
+    </fieldset>
+  </div>
+</form>

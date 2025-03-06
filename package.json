@@ -5,6 +5,7 @@
     "daisyui": "5.0.0"
   },
   "scripts": {
+    "dev": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --watch",
     "dev:build:css": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --watch",
     "build:css": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --minify"
   }

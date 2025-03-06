@@ -1,0 +1,26 @@
+<!-- name of each tab group should be unique -->
+<div class="tabs tabs-border">
+  <input type="radio" name="my_tabs_2" class="tab" aria-label="My Collection" />
+  <div class="tab-content border-base-300 bg-base-100 p-10">TODO</div>
+
+  <input
+    type="radio"
+    name="my_tabs_2"
+    class="tab"
+    aria-label="Request"
+    checked="checked"
+  />
+  <div class="tab-content border-base-300 bg-base-100 p-10">
+    {% include "components/request_form.html" %}
+  </div>
+
+  <input type="radio" name="my_tabs_2" class="tab" aria-label="Load Test" />
+  <div class="tab-content border-base-300 bg-base-100 p-10">
+    {% include "components/load_test.html" %}
+  </div>
+  <div class="tab">
+    <button class="btn btn-ghost btn-square btn-sm">
+      <span class="material-symbols-rounded" style="font-size: 18px">add</span>
+    </button>
+  </div>
+</div>
