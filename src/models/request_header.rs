@@ -1,14 +1,14 @@
-use crate::schema::collection_headers;
+use crate::schema::request_headers;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Selectable)]
-#[diesel(table_name = collection_headers)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name=request_headers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct CollectionHeader {
+pub struct RequestHeader {
     pub id: i32,
-    pub collection_id: i32,
+    pub request_id: Option<i32>,
     pub key: String,
     pub value: String,
     pub created_at: NaiveDateTime,
@@ -16,10 +16,10 @@ pub struct CollectionHeader {
 }
 
 #[derive(Insertable)]
-#[diesel(table_name=collection_headers)]
+#[diesel(table_name=request_headers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct NewCollectionHeader<'a> {
-    pub collection_id: &'a i32,
+pub struct NewRequestHeader<'a> {
+    pub request_id: i32,
     pub key: &'a str,
     pub value: &'a str,
 }

@@ -2,7 +2,7 @@
 
 diesel::table! {
     collection_headers (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         collection_id -> Integer,
         key -> Text,
         value -> Text,
@@ -13,7 +13,7 @@ diesel::table! {
 
 diesel::table! {
     collections (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         name -> Text,
         host -> Text,
         created_at -> Timestamp,
@@ -22,8 +22,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    load_test (id) {
-        id -> Nullable<Integer>,
+    load_tests (id) {
+        id -> Integer,
         source_type -> Nullable<Text>,
         source_id -> Nullable<Integer>,
         name -> Text,
@@ -36,7 +36,7 @@ diesel::table! {
 
 diesel::table! {
     request_headers (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         request_id -> Nullable<Integer>,
         key -> Text,
         value -> Text,
@@ -47,7 +47,7 @@ diesel::table! {
 
 diesel::table! {
     requests (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         name -> Text,
         collection_id -> Nullable<Integer>,
         path -> Text,
@@ -59,10 +59,14 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(collection_headers -> collections (collection_id));
+diesel::joinable!(request_headers -> requests (request_id));
+diesel::joinable!(requests -> collections (collection_id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     collection_headers,
     collections,
-    load_test,
+    load_tests,
     request_headers,
     requests,
 );

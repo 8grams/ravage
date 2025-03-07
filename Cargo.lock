@@ -690,6 +690,7 @@ version = "2.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "470eb10efc8646313634c99bb1593f402a6434cbd86e266770c6e39219adb86a"
 dependencies = [
+ "chrono",
  "diesel_derives",
  "libsqlite3-sys",
  "r2d2",

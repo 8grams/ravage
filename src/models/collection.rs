@@ -3,8 +3,9 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug, Selectable, Clone)]
+#[derive(Deserialize, Serialize, Debug, Selectable, Clone, Queryable, QueryableByName)]
 #[diesel(table_name=collections)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Collection {
     pub id: i32,
     pub name: String,

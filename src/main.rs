@@ -51,6 +51,7 @@ pub async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(index::main_pages))
             .service(pages::login::login_page())
             .service(pages::auth::auth_scope())
+            .service(pages::api::api_scope())
             .default_service(web::get().to(pages::error_404::main))
     })
     .bind((server_address.as_str(), server_port.parse::<u16>().unwrap()))?
