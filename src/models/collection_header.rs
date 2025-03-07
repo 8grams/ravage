@@ -3,7 +3,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Selectable)]
+#[derive(Debug, Deserialize, Serialize, Selectable, Queryable)]
 #[diesel(table_name = collection_headers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct CollectionHeader {
@@ -15,11 +15,11 @@ pub struct CollectionHeader {
     pub updated_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[diesel(table_name=collection_headers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct NewCollectionHeader<'a> {
-    pub collection_id: &'a i32,
-    pub key: &'a str,
-    pub value: &'a str,
+pub struct NewCollectionHeader {
+    pub collection_id: i32,
+    pub key: String,
+    pub value: String,
 }

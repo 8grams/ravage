@@ -8,8 +8,20 @@
     tabindex="0"
     class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
   >
-    <li><a>Edit</a></li>
-    <li><a>Delete</a></li>
+    <li>
+      <button
+        hx-get="/api/collections/{{collection.id}}/edit"
+        hx-swap="innerHTML"
+        hx-target="#modal"
+      >
+        Edit
+      </button>
+    </li>
+    <li>
+      <button hx-delete="/api/collections/{{collection.id}}?refresh=true">
+        Delete
+      </button>
+    </li>
     <li><a>New Request</a></li>
   </ul>
 </div>

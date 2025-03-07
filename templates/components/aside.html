@@ -10,7 +10,12 @@
     <span>Collection</span>
   </label>
   <div class="tab-content bg-base-100 border-base-300 p-6">
-    <button class="btn btn-neutral w-full" onclick="new_collection.showModal()">
+    <button
+      hx-get="/api/collections/new"
+      hx-swap="innerHTML"
+      hx-target="#modal"
+      class="btn btn-neutral w-full"
+    >
       <span class="material-symbols-rounded">add</span>
       <span>New Collection</span>
     </button>
@@ -30,4 +35,3 @@
     {% include "components/histories.html" %}
   </div>
 </div>
-{% include "components/collections/collection_popup.html" %}

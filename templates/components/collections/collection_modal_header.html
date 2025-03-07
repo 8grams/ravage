@@ -1,0 +1,65 @@
+<div
+  class="mt-6 space-y-4"
+  x-data="{
+  headers: {%if headers %}[{% for header in headers %}{'key':'{{header.key}}','value':'{{header.value}}'}{%endfor%}]{%else%}[]{%endif%},
+    addHeader() {
+      this.headers.push({ key: '', value: '' });
+    },
+    removeHeader(index) {
+      this.headers.splice(index, 1);
+    }
+  }"
+>
+  <div class="flex justify-between">
+    <div>
+      <label class="label">Default Headers</label>
+    </div>
+    <div>
+      <button
+        class="btn btn-xs btn-square btn-ghost"
+        type="button"
+        x-on:click="addHeader"
+      >
+        <span class="material-symbols-rounded" style="font-size: 18px"
+          >add</span
+        >
+      </button>
+    </div>
+  </div>
+  <input name="headers" type="hidden" x-bind:value="JSON.stringify(headers)" />
+  <template x-for="(header, index) in headers" :key="index">
+    <div class="flex gap-2">
+      <label class="floating-label">
+        <span>Key</span>
+        <input
+          type="text"
+          placeholder="Key"
+          class="input input-bordered"
+          x-model="header.key"
+          required
+        />
+      </label>
+      <label class="floating-label">
+        <span>Value</span>
+        <input
+          type="text"
+          placeholder="Value"
+          class="input input-bordered"
+          x-model="header.value"
+          required
+        />
+      </label>
+      <div>
+        <button
+          class="btn btn-square btn-ghost btn-error"
+          type="button"
+          x-on:click="removeHeader(index)"
+        >
+          <span class="material-symbols-rounded" style="font-size: 20px"
+            >delete</span
+          >
+        </button>
+      </div>
+    </div>
+  </template>
+</div>

@@ -1,8 +1,16 @@
+use crate::{app_state::AppState, models::collection::Collection, schema::collections};
 use actix_web::{HttpResponse, Responder, web};
+use diesel::prelude::*;
 
-use crate::app_state::AppState;
 pub async fn main_pages(data: web::Data<AppState>) -> impl Responder {
-    let ctx = tera::Context::new();
+    let conn = &mut data.pool.get().unwrap();
+    let mut ctx = tera::Context::new();
+    if let Ok(cs) = collections::table
+        .select(Collection::as_select())
+        .load::<Collection>(conn)
+    {
+        ctx.insert("collections", &cs);
+    };
     let rendered = data.tera.render("pages/index.html", &ctx).unwrap();
 
     HttpResponse::Ok().body(rendered)

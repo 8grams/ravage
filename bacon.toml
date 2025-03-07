@@ -74,6 +74,8 @@ on_success = "back"                               # so that we don't open the br
 command = [
   "cargo",
   "run",
+  "--",
+  "RUST_BACKTRACE=1",
   # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true

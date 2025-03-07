@@ -39,6 +39,7 @@ pub async fn main() -> std::io::Result<()> {
                 CookieSessionStore::default(),
                 secret_key,
             ))
+            .wrap(middleware::refresh::RefreshMiddleware)
             .app_data(web::Data::new(AppState {
                 tera: tera_tmpl.clone(),
                 pool: pool.clone(),
