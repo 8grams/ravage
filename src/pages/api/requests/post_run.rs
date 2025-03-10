@@ -1,7 +1,7 @@
 use actix_web::{HttpResponse, Responder, web};
 use chrono::Utc;
 use diesel::prelude::*;
-use std::fs::{File, OpenOptions, create_dir_all};
+use std::fs::{File, create_dir_all};
 use std::io::Write;
 
 use crate::models::load_test::NewLoadTest;
@@ -28,7 +28,18 @@ pub async fn run(state: web::Data<AppState>, id: web::Path<i32>) -> impl Respond
         .unwrap();
 
     let reqw_req = send_request(&req, &coll, None).await.unwrap();
-    let text = reqw_req.text().await.unwrap();
+    let bytes = reqw_req.bytes().await.unwrap();
+
+    let mut text_response = String::new();
+
+    let text = String::from_utf8(bytes.clone().to_vec()).unwrap();
+    if text.to_lowercase().contains("<html>") {
+        let escaped = html_escape::encode_text(&text);
+        text_response = escaped.to_string();
+    } else {
+        text_response = text.to_string();
+    }
+
     let log_dir = "./static/log";
     create_dir_all(log_dir).unwrap();
 
@@ -36,20 +47,7 @@ pub async fn run(state: web::Data<AppState>, id: web::Path<i32>) -> impl Respond
     let file_name = format!("log_{}.txt", timestamp);
     let log_path = format!("{}/{}", log_dir, file_name);
     let mut file = File::create(&log_path).unwrap();
-    file.write(text.as_bytes()).unwrap();
+    file.write_all(&bytes.clone()).unwrap();
 
-    let new_loadtest = NewLoadTest {
-        name: req.name.clone(),
-        source_type: "Request".to_string(),
-        source_id: req.id,
-        log_path: format!("/log/{}", file_name),
-    };
-
-    let _ = diesel::insert_into(load_tests::table)
-        .values(&new_loadtest)
-        .execute(conn)
-        .unwrap();
-
-    println!("{}", text);
-    HttpResponse::Ok().body("Ok")
+    HttpResponse::Ok().body(text_response)
 }

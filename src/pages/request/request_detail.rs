@@ -3,7 +3,7 @@ use diesel::prelude::*;
 
 use crate::{
     app_state::AppState, models::request::Request, schema::requests,
-    services::get_main_collection::get_main_collections,
+    services::get_collection::get_main_collections,
 };
 
 pub async fn request_detail(path: web::Path<i32>, state: web::Data<AppState>) -> impl Responder {

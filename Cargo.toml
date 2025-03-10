@@ -24,3 +24,6 @@ actix-session = { version = "0.10.1", features = ["cookie-session"] }
 chrono = { version = "0.4.40", features = ["serde"] }
 reqwest = { version = "0.12.12", features = ["json", "rustls-tls"] }
 env_logger = { version = "0.11.6", default-features = false }
+goose = { version = "0.18.0" }
+html-escape = { version = "0.2.13", default-features = false }
+tokio = { version = "1", features = ["full"] }

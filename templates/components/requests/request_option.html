@@ -12,12 +12,17 @@
       <a href="/requests/{{request.id}}">Edit</a>
     </li>
     <li>
-      <button hx-delete="/api/requests/{{request.id}}?refresh=true">
-        Delete
+      <button
+        hx-get="/api/load_tests/new?collection_id={{request.collection_id}}&request_id={{request.id}}"
+        hx-target="#modal"
+      >
+        Load Test
       </button>
     </li>
     <li>
-      <a href="/loadtest/new?request_id={{request.id}}">New Load Test</a>
+      <button hx-delete="/api/requests/{{request.id}}?refresh=true">
+        Delete
+      </button>
     </li>
   </ul>
 </div>

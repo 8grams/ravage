@@ -12,7 +12,6 @@
     <div class="text-end">
       <button class="btn btn-neutral" type="submit">Save</button>
       {%if request %}
-      <button class="btn btn-error" type="button">Load Test</button>
       <button
         class="btn btn-success"
         type="button"
@@ -111,5 +110,15 @@
       </fieldset>
     </div>
   </form>
-  <textarea id="log" class="textarea w-full mt-10" rows="10"></textarea>
+  {% if request %}
+  <fieldset class="fieldset">
+    <legend class="fieldset-legend">Response</legend>
+    <textarea
+      id="log"
+      class="textarea w-full mt-10"
+      rows="10"
+      readonly
+    ></textarea>
+  </fieldset>
+  {% endif %}
 </div>
