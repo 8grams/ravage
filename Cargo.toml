@@ -20,5 +20,5 @@ diesel = { version = "2.2.0", features = [
   "chrono",
 ] }
 dotenvy = "0.15.7"
-actix-session = { version = "0.10.1", features = ["cookie-session"] }
+actix-session = { version = "0.10.1", features = ["redis-session"] }
 chrono = { version = "0.4.40", features = ["serde"] }
