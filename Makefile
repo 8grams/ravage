@@ -7,3 +7,10 @@ diesel-instal:
 
 dev:
 	(trap "kill 0" SIGINT; cargo watch -x run & pnpm run dev:build:css)
+
+migrate-up:
+	diesel migration run
+
+# revert migration
+migrate-down:
+	diesel migration revert -n 1

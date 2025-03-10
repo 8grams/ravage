@@ -1,25 +1,45 @@
 <!-- name of each tab group should be unique -->
 <div class="tabs tabs-border">
-  <input type="radio" name="my_tabs_2" class="tab" aria-label="My Collection" />
-  <div class="tab-content border-base-300 bg-base-100 p-10">TODO</div>
+  {% for tab in tabs %}
+  <label class="tab">
+    <input type="radio" name="main_tabs" {%if loop.last %}checked{%endif%} />
+    <span>{{tab.name}}</span>
+  </label>
+  <div class="tab-content border-base-300 bg-base-100 p-10">
+    {% if tab.type == "request" %}
+    <!-- separator -->
+    {% include "components/request_form.html" %}
+    <!-- separator -->
+    {% endif %}
+  </div>
+  <div class="tab -ml-6">
+    <button
+      class="btn btn-ghost btn-square btn-sm"
+      hx-delete="/api/tabs?refresh=true&name={{tab.name}}&type={{tab.type}}{%if tab.id %}&id={{tab.id}}{%endif%}"
+    >
+      <span class="material-symbols-rounded" style="font-size: 18px"
+        >close</span
+      >
+    </button>
+  </div>
+  {% endfor %}
 
-  <input
-    type="radio"
-    name="my_tabs_2"
-    class="tab"
-    aria-label="Request"
-    checked="checked"
-  />
+  <input type="radio" name="main_tabs" class="tab" aria-label="Request" />
   <div class="tab-content border-base-300 bg-base-100 p-10">
     {% include "components/request_form.html" %}
   </div>
 
-  <input type="radio" name="my_tabs_2" class="tab" aria-label="Load Test" />
+  <input type="radio" name="main_tabs" class="tab" aria-label="Load Test" />
   <div class="tab-content border-base-300 bg-base-100 p-10">
     {% include "components/load_test.html" %}
   </div>
   <div class="tab">
-    <button class="btn btn-ghost btn-square btn-sm">
+    <button
+      class="btn btn-ghost btn-square btn-sm"
+      hx-post="/api/tabs?refresh=true"
+      hx-ext="json-enc"
+      hx-vals='{"name":"new request{%if tabs %} {{tabs|length}}{%endif%}","type":"request"}'
+    >
       <span class="material-symbols-rounded" style="font-size: 18px">add</span>
     </button>
   </div>

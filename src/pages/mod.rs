@@ -1,3 +1,4 @@
+pub mod api;
 pub mod auth;
 pub mod error_404;
 pub mod index;

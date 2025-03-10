@@ -1,9 +1,10 @@
+{% for collection in collections %}
 <li x-data="{open : false}">
   <div
     class="menu-dropdown-toggle group relative"
     x-bind:class="open?'menu-dropdown-show':''"
   >
-    <span> My Collection </span>
+    <span> {{collection.name}} </span>
     <span
       x-on:click="open=!open"
       class="absolute w-full h-full top-0 left-0"
@@ -74,3 +75,4 @@
     </li>
   </ul>
 </li>
+{% endfor %}

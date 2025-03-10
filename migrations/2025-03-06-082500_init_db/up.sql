@@ -1,0 +1,53 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE collections (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  name TEXT NOT NULL,
+  host TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+CREATE TABLE collection_headers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  collection_id INTEGER NOT NULL,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE CASCADE
+);
+
+CREATE TABLE requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  name TEXT NOT NULL,
+  collection_id INTEGER,
+  path TEXT NOT NULL,
+  method TEXT NOT NULL,
+  body_type TEXT NOT NULL,
+  body_content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE SET NULL
+);
+
+CREATE TABLE request_headers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  request_id INTEGER,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (request_id) REFERENCES requests (id) ON DELETE CASCADE
+);
+
+CREATE TABLE load_tests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  source_type TEXT,
+  source_id INTEGER,
+  name TEXT NOT NULL,
+  log_path TEXT,
+  report_path TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP
+);

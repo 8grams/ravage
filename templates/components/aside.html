@@ -10,7 +10,12 @@
     <span>Collection</span>
   </label>
   <div class="tab-content bg-base-100 border-base-300 p-6">
-    <button class="btn btn-neutral w-full" onclick="new_collection.showModal()">
+    <button
+      hx-get="/api/collections/new"
+      hx-swap="innerHTML"
+      hx-target="#modal"
+      class="btn btn-neutral w-full"
+    >
       <span class="material-symbols-rounded">add</span>
       <span>New Collection</span>
     </button>
@@ -30,76 +35,3 @@
     {% include "components/histories.html" %}
   </div>
 </div>
-<!-- Open the modal using ID.showModal() method -->
-<dialog id="new_collection" class="modal">
-  <div class="modal-box">
-    <h3 class="text-lg font-bold">New Collection</h3>
-    <div class="my-8">
-      <div class="form space-y-4">
-        <label class="floating-label">
-          <span>Collection Name</span>
-          <input
-            required
-            type="text"
-            placeholder="Collection Name"
-            class="input input-bordered w-full"
-          />
-        </label>
-        <label class="floating-label">
-          <span>Base Path</span>
-          <input
-            required
-            type="url"
-            placeholder="Base Path"
-            class="input input-bordered w-full"
-          />
-        </label>
-      </div>
-      <div class="mt-6 space-y-4">
-        <div class="flex justify-between">
-          <div>
-            <label class="label">Default Headers</label>
-          </div>
-          <div>
-            <button class="btn btn-xs btn-square btn-ghost" type="button">
-              <span class="material-symbols-rounded" style="font-size: 18px"
-                >add</span
-              >
-            </button>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <label class="floating-label">
-            <span>Key</span>
-            <input type="text" placeholder="Key" class="input input-bordered" />
-          </label>
-          <label class="floating-label">
-            <span>Value</span>
-            <input
-              type="text"
-              placeholder="Value"
-              class="input input-bordered"
-            />
-          </label>
-          <div>
-            <button class="btn btn-square btn-ghost btn-error" type="button">
-              <span class="material-symbols-rounded" style="font-size: 20px"
-                >delete</span
-              >
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-action">
-      <form method="dialog">
-        <!-- if there is a button in form, it will close the modal -->
-        <button class="btn">Cancel</button>
-      </form>
-      <button class="btn btn-neutral">Create</button>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
