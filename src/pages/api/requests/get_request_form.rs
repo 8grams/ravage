@@ -1,13 +1,8 @@
+use crate::{app_state::AppState, models::request::Request, schema::requests};
 use actix_web::{HttpResponse, Responder, web};
 use diesel::prelude::*;
 
-use crate::{app_state::AppState, models::request::Request, schema::requests, utils};
-pub async fn request_form(
-    state: web::Data<AppState>,
-    path: web::Path<i32>,
-    session: actix_session::Session,
-) -> impl Responder {
-    let tabs = utils::session::get_session_tabs(session.clone()).await;
+pub async fn request_form(state: web::Data<AppState>, path: web::Path<i32>) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
     let mut ctx = tera::Context::new();
     let req_id = path.into_inner();

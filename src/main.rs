@@ -52,6 +52,7 @@ pub async fn main() -> std::io::Result<()> {
             )
             .route("/ping", web::get().to(pages::ping::main))
             .route("/", web::get().to(index::main_pages))
+            .service(pages::request::request_scope())
             .service(pages::login::login_page())
             .service(pages::auth::auth_scope())
             .service(pages::api::api_scope())

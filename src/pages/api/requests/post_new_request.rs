@@ -74,7 +74,9 @@ pub async fn new_request(
                 eprintln!("Failed to update session: {:?}", err);
             }
 
-            HttpResponse::Ok().json(succ_req)
+            HttpResponse::Ok()
+                .append_header(("hx-location", format!("/requests/{}", &succ_req.id)))
+                .json(succ_req)
         }
         Err(err) => {
             eprintln!("Failed to insert request: {:?}", err);

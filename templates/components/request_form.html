@@ -3,7 +3,7 @@
     type="number"
     class="hidden"
     name="collection_id"
-    value="{%if tab %}{{tab.collection_id}}{%elif request%}{{request.collection_id}}{%endif%}"
+    value="{{request.collection_id | default(value=COLLECTION_ID)}}"
   />
   <div class="text-end">
     <button class="btn btn-neutral">Save</button>

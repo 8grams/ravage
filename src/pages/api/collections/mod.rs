@@ -1,6 +1,7 @@
 use actix_web::{Scope, web};
 
 mod delete_collection;
+mod get_children_list;
 mod get_collection_requests;
 mod get_collections;
 mod get_edit_collection_modal_form;
@@ -23,6 +24,10 @@ pub fn collections_scope() -> Scope {
             web::resource("/{id}")
                 .route(web::post().to(post_update_collection::update_collection))
                 .route(web::delete().to(delete_collection::remove_single_collection)),
+        )
+        .route(
+            "/{id}/childrens",
+            web::get().to(get_children_list::children_list),
         )
         .route(
             "/{id}/edit",

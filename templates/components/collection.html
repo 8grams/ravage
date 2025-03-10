@@ -16,9 +16,9 @@
   </div>
   <ul class="menu-dropdown" x-bind:class="{'menu-dropdown-show':open}">
     <div
-      hx-get="/api/collections/{{collection.id}}/requests"
+      hx-get="/api/collections/{{collection.id}}/childrens"
       hx-swap="outerHTML"
-      hx-trigger="revealed"
+      hx-trigger="load"
     ></div>
     <!-- <li> -->
     <!--   <div> -->
