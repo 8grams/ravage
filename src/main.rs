@@ -1,7 +1,7 @@
 extern crate dotenvy;
 extern crate tera;
 
-use actix_session::{SessionMiddleware, storage::RedisSessionStore};
+use actix_session::{SessionMiddleware, storage::CookieSessionStore};
 use actix_web::{App, HttpServer, cookie::Key, middleware::Logger, web};
 use app_state::AppState;
 use dotenvy::dotenv;
@@ -26,9 +26,6 @@ pub async fn main() -> std::io::Result<()> {
     let tera_tmpl = embed::load_templates().unwrap();
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
-    let store = RedisSessionStore::new(env::var("REDIS_URL").unwrap())
-        .await
-        .unwrap();
 
     let server = HttpServer::new(move || {
         let logger = Logger::default();
@@ -41,7 +38,10 @@ pub async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(logger)
             .wrap(middleware::check_login::CheckLogin)
-            .wrap(SessionMiddleware::new(store.clone(), secret_key))
+            .wrap(SessionMiddleware::new(
+                CookieSessionStore::default(),
+                secret_key,
+            ))
             .wrap(middleware::refresh::RefreshMiddleware)
             .app_data(web::Data::new(AppState {
                 tera: tera_tmpl.clone(),
