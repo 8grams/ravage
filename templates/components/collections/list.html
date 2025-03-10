@@ -5,6 +5,9 @@
     class="menu-dropdown-toggle group relative"
     x-bind:class="open?'menu-dropdown-show':''"
   >
+    <span class="material-symbols-rounded" style="font-size: 18px">
+      folder
+    </span>
     <span> {{collection.name}} </span>
     <span
       x-on:click="open=!open"

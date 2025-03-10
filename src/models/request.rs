@@ -12,8 +12,8 @@ pub struct Request {
     pub name: String,
     pub path: String,
     pub method: String,
-    pub body_type: String,
-    pub body_content: String,
+    pub body_type: Option<String>,
+    pub body_content: Option<String>,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>,
 }
@@ -21,11 +21,11 @@ pub struct Request {
 #[derive(Insertable)]
 #[diesel(table_name=requests)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct NewRequest<'a> {
-    pub collection_id: &'a i32,
-    pub method: &'a str,
-    pub name: &'a str,
-    pub path: &'a str,
-    pub body_type: &'a str,
-    pub body_content: &'a str,
+pub struct NewRequest {
+    pub collection_id: i32,
+    pub method: String,
+    pub name: String,
+    pub path: String,
+    pub body_type: Option<String>,
+    pub body_content: Option<String>,
 }

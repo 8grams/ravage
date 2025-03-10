@@ -14,8 +14,8 @@ pub struct JsonData {
     path: String,
     collection_id: String,
     method: String,
-    body_type: String,
-    body_content: String,
+    body_type: Option<String>,
+    body_content: Option<String>,
 }
 
 pub async fn new_request(state: web::Data<AppState>, data: web::Json<JsonData>) -> impl Responder {
@@ -28,12 +28,12 @@ pub async fn new_request(state: web::Data<AppState>, data: web::Json<JsonData>) 
     };
 
     let new_request = NewRequest {
-        name: &json_data.name,
-        path: &json_data.path,
-        method: &json_data.method,
-        body_type: &json_data.body_type,
-        body_content: &json_data.body_content,
-        collection_id: &c_id,
+        name: json_data.name,
+        path: json_data.path,
+        method: json_data.method,
+        body_type: json_data.body_type,
+        body_content: json_data.body_content,
+        collection_id: c_id,
     };
 
     // Insert new request and get the result

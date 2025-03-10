@@ -29,7 +29,7 @@ pub async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
-        let logger = Logger::new("%a %{User-Agent}i");
+        let logger = Logger::default();
         let secret_key = Key::from(
             env::var("SECRET_KEY")
                 .expect("SECRET_KEY not found")
@@ -62,10 +62,5 @@ pub async fn main() -> std::io::Result<()> {
     })
     .bind((server_address.as_str(), server_port.parse::<u16>().unwrap()))?
     .run();
-    println!("Please to run pnpm dev, if you run this with bacon");
-    println!(
-        "Started http server: http://{}:{}",
-        server_address, server_port
-    );
     server.await
 }

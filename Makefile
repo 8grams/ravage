@@ -14,3 +14,6 @@ migrate-up:
 # revert migration
 migrate-down:
 	diesel migration revert -n 1
+
+fix:
+	cargo clippy --fix --allow-dirty

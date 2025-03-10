@@ -52,8 +52,8 @@ diesel::table! {
         collection_id -> Integer,
         path -> Text,
         method -> Text,
-        body_type -> Text,
-        body_content -> Text,
+        body_type -> Nullable<Text>,
+        body_content -> Nullable<Text>,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
     }

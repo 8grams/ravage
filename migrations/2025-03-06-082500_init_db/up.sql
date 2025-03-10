@@ -24,8 +24,8 @@ CREATE TABLE requests (
   collection_id INTEGER NOT NULL,
   path TEXT NOT NULL,
   method TEXT NOT NULL,
-  body_type TEXT NOT NULL,
-  body_content TEXT NOT NULL,
+  body_type TEXT,
+  body_content TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
   FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE SET NULL
