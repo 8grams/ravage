@@ -22,6 +22,14 @@
         Delete
       </button>
     </li>
-    <li><a>New Request</a></li>
+    <li>
+      <button
+        hx-post="/api/tabs?refresh=false"
+        hx-ext="json-enc"
+        hx-vals='{"name":"new request{%if tabs%} {{tabs | length}}{%endif%}", "type":"request", "collection_id":"{{collection.id}}"}'
+      >
+        New Request
+      </button>
+    </li>
   </ul>
 </div>

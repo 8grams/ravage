@@ -15,64 +15,69 @@
     {% include "components/collection_option.html" %}
   </div>
   <ul class="menu-dropdown" x-bind:class="{'menu-dropdown-show':open}">
-    <li>
-      <div>
-        <span class="material-symbols-rounded" style="font-size: 18px">
-          folder
-        </span>
-        Project-final.psd
-        <div class="dropdown dropdown-end">
-          <div
-            tabindex="0"
-            role="button"
-            class="btn btn-xs btn-square btn-ghost"
-          >
-            <span class="material-symbols-rounded" style="font-size: 18px">
-              more_vert
-            </span>
-          </div>
-          <ul
-            tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-          >
-            <li><a>Item 1</a></li>
-            <li><a>Item 2</a></li>
-          </ul>
-        </div>
-      </div>
-    </li>
-    <li>
-      <a>
-        <span class="material-symbols-rounded" style="font-size: 18px">
-          folder
-        </span>
-        Project-final-2.psd
-      </a>
-    </li>
-    <li>
-      <details open>
-        <summary>
-          <span class="material-symbols-rounded" style="font-size: 18px">
-            folder
-          </span>
-          Images
-        </summary>
-        <ul>
-          <li>
-            <a>
-              <span class="badge badge-outline badge-xs">GET</span>
-              Request
-            </a>
-          </li>
-          <li>
-            <a>
-              <span class="badge badge-outline badge-xs">POST</span>
-              Request
-            </a>
-          </li>
-        </ul>
-      </details>
-    </li>
+    <div
+      hx-get="/api/collections/{{collection.id}}/requests"
+      hx-swap="outerHTML"
+      hx-trigger="revealed"
+    ></div>
+    <!-- <li> -->
+    <!--   <div> -->
+    <!--     <span class="material-symbols-rounded" style="font-size: 18px"> -->
+    <!--       folder -->
+    <!--     </span> -->
+    <!--     Project-final.psd -->
+    <!--     <div class="dropdown dropdown-end"> -->
+    <!--       <div -->
+    <!--         tabindex="0" -->
+    <!--         role="button" -->
+    <!--         class="btn btn-xs btn-square btn-ghost" -->
+    <!--       > -->
+    <!--         <span class="material-symbols-rounded" style="font-size: 18px"> -->
+    <!--           more_vert -->
+    <!--         </span> -->
+    <!--       </div> -->
+    <!--       <ul -->
+    <!--         tabindex="0" -->
+    <!--         class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm" -->
+    <!--       > -->
+    <!--         <li><a>Item 1</a></li> -->
+    <!--         <li><a>Item 2</a></li> -->
+    <!--       </ul> -->
+    <!--     </div> -->
+    <!--   </div> -->
+    <!-- </li> -->
+    <!-- <li> -->
+    <!--   <a> -->
+    <!--     <span class="material-symbols-rounded" style="font-size: 18px"> -->
+    <!--       folder -->
+    <!--     </span> -->
+    <!--     Project-final-2.psd -->
+    <!--   </a> -->
+    <!-- </li> -->
+    <!-- <li> -->
+    <!--   <details open> -->
+    <!--     <summary> -->
+    <!--       <span class="material-symbols-rounded" style="font-size: 18px"> -->
+    <!--         folder -->
+    <!--       </span> -->
+    <!--       Images -->
+    <!--     </summary> -->
+    <!--     <ul> -->
+    <!--       <li> -->
+    <!--         <a> -->
+    <!--           <span class="badge badge-outline badge-xs">GET</span> -->
+    <!--           Request -->
+    <!--         </a> -->
+    <!--       </li> -->
+    <!--       <li> -->
+    <!--         <a> -->
+    <!--           <span class="badge badge-outline badge-xs">POST</span> -->
+    <!--           Request -->
+    <!--         </a> -->
+    <!--       </li> -->
+    <!--     </ul> -->
+    <!--   </details> -->
+    <!-- </li> -->
   </ul>
 </li>
 {% endfor %}

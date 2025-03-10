@@ -1,4 +1,10 @@
-<form>
+<form hx-post="/api/requests" hx-ext="json-enc">
+  <input
+    type="number"
+    class="hidden"
+    name="collection_id"
+    value="{%if tab %}{{tab.collection_id}}{%elif request%}{{request.collection_id}}{%endif%}"
+  />
   <div class="text-end">
     <button class="btn btn-neutral">Save</button>
     <button class="btn btn-primary">Run</button>
@@ -6,14 +12,28 @@
   <div class="mt-8 space-y-4">
     <fieldset class="fieldset">
       <legend class="fieldset-legend">Request Name</legend>
-      <input type="text" class="input w-full" placeholder="Request Name" />
+      <input
+        type="text"
+        class="input w-full"
+        name="name"
+        required
+        placeholder="Request Name"
+        value="{{request.name|default(value='')}}"
+      />
     </fieldset>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">Path</legend>
       <div class="flex gap-2">
-        <input type="text" class="input w-full" placeholder="/api/request" />
-        <select class="select w-max" required>
-          <option disabled selected>METHOD</option>
+        <input
+          name="path"
+          required
+          type="text"
+          class="input w-full"
+          placeholder="/api/request"
+          value="{{request.path|default(value='')}}"
+        />
+        <select class="select w-max" required name="method">
+          <option disabled selected value="">METHOD</option>
           <option>GET</option>
           <option>POST</option>
           <option>PUT</option>
@@ -36,33 +56,46 @@
       <legend class="fieldset-legend">Body</legend>
       <div class="flex gap-4">
         <label>
+          <!-- prettier-ignore -->
           <input
             type="radio"
-            name="radio-3"
+            name="body_type"
             class="radio radio-sm radio-neutral"
-            checked="checked"
+            {%if request and request.body_type == 'application/json' %}checked{%endif%}
+            value="application/json"
           />
           <span>JSON</span>
         </label>
         <label>
+          <!-- prettier-ignore -->
           <input
             type="radio"
-            name="radio-3"
+            name="body_type"
             class="radio radio-sm radio-neutral"
+            value="multipart/form-data"
+            {%if request and request.body_type == 'multipart/form-data' %}checked{%endif%}
           />
-          <span>Form Data</span>
+          <span>multipart/form-data</span>
         </label>
         <label>
+          <!-- prettier-ignore -->
           <input
             type="radio"
-            name="radio-3"
             class="radio radio-sm radio-neutral"
+            name="body_type"
+            {%if request and request.body_type == 'application/x-www-form-urlencoded' %}checked{%endif%}
+            value="application/x-www-form-urlencoded"
           />
-          <span>Query Params</span>
+          <span>x-www-form-urlencoded</span>
         </label>
       </div>
       <div class="mt-4">
-        <textarea class="textarea w-full" rows="5" placeholder="..."></textarea>
+        <textarea
+          class="textarea w-full"
+          rows="5"
+          placeholder="..."
+          name="body_content"
+        ></textarea>
       </div>
     </fieldset>
   </div>

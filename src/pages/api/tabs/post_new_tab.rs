@@ -7,6 +7,7 @@ pub struct JsonData {
     name: String,
     id: Option<i32>,
     r#type: String,
+    collection_id: String,
 }
 
 pub async fn new_tab(session: actix_session::Session, data: web::Json<JsonData>) -> impl Responder {
@@ -16,6 +17,7 @@ pub async fn new_tab(session: actix_session::Session, data: web::Json<JsonData>)
         name: json_data.name,
         id: json_data.id,
         r#type: json_data.r#type,
+        collection_id: json_data.collection_id.parse::<i32>().unwrap(),
     };
     current_session.push(new_session);
 

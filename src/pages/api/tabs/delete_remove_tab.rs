@@ -7,6 +7,7 @@ pub struct QueryParams {
     name: String,
     id: Option<i32>,
     r#type: String,
+    collection_id: i32,
 }
 
 pub async fn remove_tab(
@@ -18,6 +19,7 @@ pub async fn remove_tab(
         name: query_params.name,
         id: query_params.id,
         r#type: query_params.r#type,
+        collection_id: query_params.collection_id,
     };
     let mut current_session = session::get_session_tabs(session.clone()).await;
     current_session.retain(|f: &Tab| f != &tab_from_params);
