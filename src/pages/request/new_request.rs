@@ -1,7 +1,7 @@
 use actix_web::{HttpResponse, Responder, web};
 use serde::Deserialize;
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, services::get_main_collection::get_main_collections};
 
 #[derive(Deserialize)]
 pub struct QueryParams {
@@ -13,8 +13,11 @@ pub async fn new_request(
     params: web::Query<QueryParams>,
 ) -> impl Responder {
     let query_params = params.into_inner();
+    let conn = &mut state.pool.get().unwrap();
     let mut ctx = tera::Context::new();
     ctx.insert("COLLECTION_ID", &query_params.collection_id);
-    let rendered = state.tera.render("pages/requests/new.html", &ctx).unwrap();
+    let collections = get_main_collections(conn).await;
+    ctx.insert("collections", &collections);
+    let rendered = state.tera.render("pages/requests/form.html", &ctx).unwrap();
     HttpResponse::Ok().body(rendered)
 }

@@ -1,4 +1,7 @@
-<form hx-post="/api/requests" hx-ext="json-enc">
+<form
+  hx-post="/api/requests/{% if request%}{{request.id}}{%endif%}?refresh=true"
+  hx-ext="json-enc"
+>
   <input
     type="number"
     class="hidden"
@@ -30,6 +33,7 @@
           type="text"
           class="input w-full"
           placeholder="/api/request"
+          pattern="^\/[a-zA-Z0-9-_\/]*$"
           value="{{request.path|default(value='')}}"
         />
         <select class="select w-max" required name="method">

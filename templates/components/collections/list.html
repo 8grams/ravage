@@ -1,4 +1,6 @@
-<li x-data="{open : false}">
+<li
+  x-data="{open : {%if COLLECTION_ID and COLLECTION_ID == collection.id %}true{%else%}false{%endif%}}"
+>
   <div
     class="menu-dropdown-toggle group relative"
     x-bind:class="open?'menu-dropdown-show':''"

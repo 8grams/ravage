@@ -1,0 +1,23 @@
+<div class="dropdown dropdown-end ml-auto relative">
+  <div tabindex="0" role="button" class="btn btn-xs btn-square btn-ghost">
+    <span class="material-symbols-rounded" style="font-size: 18px">
+      more_vert
+    </span>
+  </div>
+  <ul
+    tabindex="0"
+    class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+  >
+    <li>
+      <a hx-get="/requests/{{request.id}}">Edit</a>
+    </li>
+    <li>
+      <button hx-delete="/api/requests/{{request.id}}?refresh=true">
+        Delete
+      </button>
+    </li>
+    <li>
+      <a href="/loadtest/new?request_id={{request.id}}">New Load Test</a>
+    </li>
+  </ul>
+</div>

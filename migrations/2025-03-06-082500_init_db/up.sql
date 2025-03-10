@@ -21,7 +21,7 @@ CREATE TABLE collection_headers (
 CREATE TABLE requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   name TEXT NOT NULL,
-  collection_id INTEGER,
+  collection_id INTEGER NOT NULL,
   path TEXT NOT NULL,
   method TEXT NOT NULL,
   body_type TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE requests (
 
 CREATE TABLE request_headers (
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  request_id INTEGER,
+  request_id INTEGER NOT NULL,
   key TEXT NOT NULL,
   value TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -2,7 +2,6 @@ use actix_web::{Scope, web};
 
 mod delete_collection;
 mod get_children_list;
-mod get_collection_requests;
 mod get_collections;
 mod get_edit_collection_modal_form;
 mod get_new_collection_modal_form;

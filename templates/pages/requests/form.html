@@ -1,0 +1,12 @@
+{% extends "base/base_app.html" %} {% block content %}
+<main
+  class="container mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-12 gap-10"
+>
+  <aside class="col-span-1 lg:col-span-4 xl:col-span-3">
+    {% include "components/aside.html" %}
+  </aside>
+  <section class="col-span-1 lg:col-span-8 xl:col-span-9">
+    {% include "components/request_form.html" %}
+  </section>
+</main>
+{% endblock %}

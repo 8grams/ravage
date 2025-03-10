@@ -1,10 +1,9 @@
 <li>
-  <button
-    hx-post="/api/tabs/"
-    hx-ext="json-enc"
-    hx-vals='{"name":"{{request.name}}","type":"request","collection_id":"{{request.collection_id}}"}'
-  >
-    <span class="badge badge-xs"> {{request.method}} </span>
-    <span>{{request.name}}</span>
-  </button>
+  <div>
+    <a href="/requests/{{request.id}}">
+      <span class="badge badge-xs"> {{request.method}} </span>
+      <span>{{request.name}}</span>
+    </a>
+    {% include "components/requests/request_option.html" %}
+  </div>
 </li>

@@ -3,3 +3,7 @@
 {%include "components/requests/list.html"%}
 <!-- separator -->
 {%endfor%}
+<!-- separator -->
+{% if not requests %}
+<p>No requests found</p>
+{%endif%}

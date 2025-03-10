@@ -15,6 +15,7 @@ mod middleware;
 pub mod models;
 mod pages;
 pub mod schema;
+pub mod services;
 pub mod utils;
 
 #[actix_web::main]

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Request {
     pub id: i32,
-    pub collection_id: Option<i32>,
+    pub collection_id: i32,
     pub name: String,
     pub path: String,
     pub method: String,
