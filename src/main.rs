@@ -27,8 +27,9 @@ pub async fn main() -> std::io::Result<()> {
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
 
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
-        let logger = Logger::default();
+        let logger = Logger::new("%a %{User-Agent}i");
         let secret_key = Key::from(
             env::var("SECRET_KEY")
                 .expect("SECRET_KEY not found")
