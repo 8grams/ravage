@@ -1,8 +1,11 @@
 <form
   hx-post="/api/load_tests{% if load_test%}/{{load_test.id}}{%endif%}?refresh={%if load_test%}true{%else%}false{%endif%}"
+  hx-ext="json-enc"
+  hx-target="#log"
+  hx-swap="innerHTML"
 >
   <div class="text-end">
-    <button class="btn btn-neutral">Save</button>
+    <input type="hidden" name="collection_id" value="{{collection.id}}" />
     <button class="btn btn-success">Run</button>
   </div>
   <fieldset class="fieldset">
@@ -61,6 +64,17 @@
         min="1"
         name="runtime"
       />
+    </fieldset>
+  </div>
+  <div class="mt-8">
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Log</legend>
+      <textarea
+        id="log"
+        placeholder="..."
+        class="textarea w-full"
+        rows="5"
+      ></textarea>
     </fieldset>
   </div>
 </form>

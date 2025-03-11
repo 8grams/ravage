@@ -71,7 +71,10 @@ pub async fn new_request(state: web::Data<AppState>, data: web::Json<JsonData>) 
             HttpResponse::Ok()
                 .append_header((
                     "hx-location",
-                    format!("/collections/{}?requests={}", &c_id, &succ_req.id),
+                    format!(
+                        "/collections/{}?request={}",
+                        &succ_req.collection_id, &succ_req.id
+                    ),
                 ))
                 .json(succ_req)
         }

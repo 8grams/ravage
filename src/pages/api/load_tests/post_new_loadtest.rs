@@ -4,9 +4,9 @@ use serde::Deserialize;
 use crate::app_state::AppState;
 use crate::services::get_collection::get_single_collection;
 use crate::services::get_request::get_single_request;
-use crate::services::gooses::goose_loadtest;
+use crate::services::gooses::{LoadTestConfig, goose_loadtest};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct JsonData {
     name: String,
     collection_id: String,
@@ -31,7 +31,41 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap();
     let req = get_single_request(conn, request_id);
 
-    let _ = goose_loadtest(coll, None).await;
+    let timeout: usize = json_data
+        .timeout
+        .unwrap_or("10".into())
+        .parse::<usize>()
+        .unwrap();
+    let starts_per_second: usize = json_data
+        .starts_per_second
+        .unwrap_or("10".into())
+        .parse::<usize>()
+        .unwrap();
+    let total_users: usize = json_data
+        .total_users
+        .unwrap_or("10".into())
+        .parse::<usize>()
+        .unwrap();
+    let runtime: usize = json_data
+        .runtime
+        .unwrap_or("10".into())
+        .parse::<usize>()
+        .unwrap();
+    let follow: bool = json_data.follow.unwrap_or("on".into()) == "on";
+
+    let _ = goose_loadtest(
+        coll,
+        None,
+        Some(LoadTestConfig {
+            load_test_id: 0,
+            starts_per_second,
+            timeout,
+            runtime,
+            follow,
+            total_users,
+        }),
+    )
+    .await;
 
     HttpResponse::Ok().body("Ok")
 }

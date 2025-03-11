@@ -22,6 +22,5 @@ pub struct LoadTest {
 pub struct NewLoadTest {
     pub source_type: String,
     pub source_id: i32,
-    pub log_path: String,
     pub name: String,
 }
