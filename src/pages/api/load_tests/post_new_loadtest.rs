@@ -1,10 +1,14 @@
 use actix_web::{HttpResponse, Responder, web};
+use chrono::Utc;
 use serde::Deserialize;
+use tokio::fs::create_dir_all;
 
 use crate::app_state::AppState;
+use crate::models::load_test::NewLoadTest;
 use crate::services::get_collection::get_single_collection;
 use crate::services::get_request::get_single_request;
 use crate::services::gooses::{LoadTestConfig, goose_loadtest};
+use crate::services::loadtest_services::insert_loadtest;
 
 #[derive(Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct JsonData {
@@ -31,11 +35,27 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap();
     let req = get_single_request(conn, request_id);
 
-    let timeout: usize = json_data
-        .timeout
-        .unwrap_or("10".into())
-        .parse::<usize>()
-        .unwrap();
+    let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
+    let report_file_name = format!("report_{}.html", timestamp);
+    let log_file_name = format!("log_{}.txt", timestamp);
+    let log_dir = "./static/log";
+    let report_dir = "./static/report";
+
+    create_dir_all(log_dir).await.unwrap();
+    create_dir_all(report_dir).await.unwrap();
+
+    let _ = insert_loadtest(
+        &mut state.pool.get().unwrap(),
+        NewLoadTest {
+            name: json_data.name,
+            source_type: json_data.collection_id.clone(),
+            source_id: collection_id,
+            log_path: format!("/log/{}", log_file_name),
+            report_path: format!("/report/{}", report_file_name),
+        },
+    )
+    .await;
+    let timeout = json_data.timeout.unwrap_or("100".into());
     let starts_per_second: usize = json_data
         .starts_per_second
         .unwrap_or("10".into())
@@ -56,14 +76,16 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     let _ = goose_loadtest(
         coll,
         None,
-        Some(LoadTestConfig {
+        LoadTestConfig {
             load_test_id: 0,
             starts_per_second,
             timeout,
             runtime,
             follow,
             total_users,
-        }),
+            log_path: format!("{}/{}", log_dir, log_file_name),
+            report_path: format!("{}/{}", report_dir, report_file_name),
+        },
     )
     .await;
 

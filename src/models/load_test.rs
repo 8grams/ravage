@@ -23,4 +23,6 @@ pub struct NewLoadTest {
     pub source_type: String,
     pub source_id: i32,
     pub name: String,
+    pub log_path: String,
+    pub report_path: String,
 }

@@ -1,0 +1,31 @@
+{% extends "base/base_app.html" %} {% block content %}
+<main class="container mx-auto px-4 py-10">
+  <div class="overflow-x-auto">
+    <table class="table">
+      <!-- head -->
+      <thead>
+        <tr>
+          <th></th>
+          <th>CreatedAt</th>
+          <th>Name</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- row 1 -->
+        {% for history in histories %}
+        <tr>
+          <th>{{loop.index}}</th>
+          <td>{{history.created_at}}</td>
+          <td>{{history.name}}</td>
+          <td>
+            <a href="{{history.log_path}}">Log</a>
+            <a href="{{history.report_path}}">Report</a>
+          </td>
+        </tr>
+        {%endfor%}
+      </tbody>
+    </table>
+  </div>
+</main>
+{% endblock %}
