@@ -29,6 +29,9 @@ pub async fn send_request(
             req_builder = req_builder.header(&key, &value);
         }
     }
+    if let Some(body_type) = &request.body_type {
+        req_builder = req_builder.header("content-type", body_type);
+    }
 
     if let Some(body) = &request.body_content {
         req_builder = req_builder.body(body.clone());

@@ -4,8 +4,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     app_state::AppState,
-    models::request::{NewRequest, Request},
-    schema::requests,
+    models::{
+        request::{NewRequest, Request},
+        request_header::NewRequestHeader,
+    },
+    schema::{request_headers, requests},
 };
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -16,6 +19,13 @@ pub struct JsonData {
     method: String,
     body_type: Option<String>,
     body_content: Option<String>,
+    headers: Option<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Header {
+    key: String,
+    value: String,
 }
 
 pub async fn new_request(state: web::Data<AppState>, data: web::Json<JsonData>) -> impl Responder {
@@ -42,9 +52,27 @@ pub async fn new_request(state: web::Data<AppState>, data: web::Json<JsonData>) 
         .returning(Request::as_select())
         .get_result::<Request>(conn)
     {
-        Ok(succ_req) => HttpResponse::Ok()
-            .append_header(("hx-location", format!("/requests/{}", &succ_req.id)))
-            .json(succ_req),
+        Ok(succ_req) => {
+            if let Some(headers) = json_data.headers {
+                let vec_headers: Vec<Header> = serde_json::from_str(headers.as_str()).unwrap();
+                let new_headers: Vec<NewRequestHeader> = vec_headers
+                    .into_iter()
+                    .map(|h| NewRequestHeader {
+                        request_id: succ_req.id,
+                        value: h.value,
+                        key: h.key,
+                    })
+                    .collect();
+                let _ = diesel::insert_into(request_headers::table)
+                    .values(&new_headers)
+                    .execute(conn)
+                    .unwrap();
+            }
+            HttpResponse::Ok()
+                .append_header(("hx-location", format!("/requests/{}", &succ_req.id)))
+                .json(succ_req)
+        }
+
         Err(err) => {
             eprintln!("Failed to insert request: {:?}", err);
             HttpResponse::InternalServerError().body("Failed to insert request")

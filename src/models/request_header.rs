@@ -18,8 +18,8 @@ pub struct RequestHeader {
 #[derive(Insertable)]
 #[diesel(table_name=request_headers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct NewRequestHeader<'a> {
+pub struct NewRequestHeader {
     pub request_id: i32,
-    pub key: &'a str,
-    pub value: &'a str,
+    pub key: String,
+    pub value: String,
 }

@@ -100,12 +100,13 @@
           </label>
         </div>
         <div class="mt-4">
+          <!-- prettier-ignore -->
           <textarea
             class="textarea w-full"
             rows="5"
             placeholder="..."
             name="body_content"
-          ></textarea>
+          >{{request.body_content | default(value='')}}</textarea>
         </div>
       </fieldset>
     </div>

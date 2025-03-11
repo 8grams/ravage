@@ -1,44 +1,38 @@
 use actix_web::{HttpResponse, Responder, web};
 use chrono::Utc;
-use diesel::prelude::*;
+use std::collections::HashMap;
 use std::fs::{File, create_dir_all};
 use std::io::Write;
 
-use crate::models::load_test::NewLoadTest;
-use crate::schema::load_tests;
+use crate::app_state::AppState;
+use crate::services::get_collection::{get_collection_headers, get_single_collection};
+use crate::services::get_request::{get_request_headers, get_single_request};
 use crate::services::reqwest::send_request;
-use crate::{
-    app_state::AppState,
-    models::{collection::Collection, request::Request},
-    schema::{collections, requests},
-};
 
 pub async fn run(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
 
-    let req = requests::table
-        .select(Request::as_select())
-        .find(id.into_inner())
-        .get_result(conn)
+    let req_id = id.into_inner();
+    let req = get_single_request(conn, req_id).await.unwrap();
+    let req_headers = get_request_headers(conn, req_id).await.unwrap();
+    let coll = get_single_collection(conn, req.collection_id)
+        .await
         .unwrap();
-    let coll = collections::table
-        .select(Collection::as_select())
-        .filter(collections::id.eq(req.collection_id))
-        .get_result(conn)
+    let coll_headers = get_collection_headers(conn, req.collection_id)
+        .await
         .unwrap();
 
-    let reqw_req = send_request(&req, &coll, None).await.unwrap();
+    let reqhdrs: Vec<(String, String)> =
+        req_headers.into_iter().map(|h| (h.key, h.value)).collect();
+    let headers: Vec<(String, String)> =
+        coll_headers.into_iter().map(|h| (h.key, h.value)).collect();
+    let headers_map: HashMap<String, String> = headers.into_iter().chain(reqhdrs).collect();
+
+    let reqw_req = send_request(&req, &coll, Some(headers_map)).await.unwrap();
     let bytes = reqw_req.bytes().await.unwrap();
 
-    let mut text_response = String::new();
-
     let text = String::from_utf8(bytes.clone().to_vec()).unwrap();
-    if text.to_lowercase().contains("<html>") {
-        let escaped = html_escape::encode_text(&text);
-        text_response = escaped.to_string();
-    } else {
-        text_response = text.to_string();
-    }
+    let escaped = html_escape::encode_text(&text.clone()).into_owned();
 
     let log_dir = "./static/log";
     create_dir_all(log_dir).unwrap();
@@ -49,5 +43,5 @@ pub async fn run(state: web::Data<AppState>, id: web::Path<i32>) -> impl Respond
     let mut file = File::create(&log_path).unwrap();
     file.write_all(&bytes.clone()).unwrap();
 
-    HttpResponse::Ok().body(text_response)
+    HttpResponse::Ok().body(escaped)
 }

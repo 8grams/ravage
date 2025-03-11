@@ -1,4 +1,7 @@
-use crate::{models::collection::Collection, schema::collections};
+use crate::{
+    models::{collection::Collection, collection_header::CollectionHeader},
+    schema::{collection_headers, collections},
+};
 use diesel::{
     prelude::*,
     r2d2::{ConnectionManager, PooledConnection},
@@ -22,4 +25,14 @@ pub async fn get_single_collection(
         .select(Collection::as_select())
         .find(collection_id)
         .get_result(conn)
+}
+
+pub async fn get_collection_headers(
+    conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
+    collection_id: i32,
+) -> Result<Vec<CollectionHeader>, Error> {
+    collection_headers::table
+        .select(CollectionHeader::as_select())
+        .filter(collection_headers::collection_id.eq(collection_id))
+        .get_results(conn)
 }
