@@ -4,3 +4,4 @@ db
 tailwindcss
 static/
 node_modules
+nix-shell/
