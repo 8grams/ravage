@@ -1,0 +1,91 @@
+<form
+  hx-post="/api/load_tests{% if load_test%}/{{load_test.id}}{%endif%}?refresh={%if load_test%}true{%else%}false{%endif%}"
+  hx-ext="json-enc"
+  hx-target="#log"
+  hx-swap="innerHTML"
+>
+  <div class="text-end">
+    <input type="hidden" name="collection_id" value="{{COLLECTION_ID}}" />
+    {% if REQUEST_ID %}
+    <input type="hidden" name="request_id" value="{{REQUEST_ID}}" />
+    {% endif %}
+    <button class="btn btn-success">Run</button>
+  </div>
+  <fieldset class="fieldset">
+    <legend class="fieldset-legend">Name</legend>
+    <input
+      type="text"
+      class="input w-full"
+      placeholder="Load test name"
+      name="name"
+      required
+    />
+  </fieldset>
+  <div class="mt-8 font-semibold">Configuration</div>
+  <div class="mt-4 space-y-4">
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Timeout</legend>
+      <input
+        type="text"
+        class="input w-full"
+        placeholder="100"
+        min="1"
+        value="100"
+        name="timeout"
+        required
+      />
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Users</legend>
+      <div class="flex gap-2">
+        <label class="floating-label">
+          <span>Starts per second</span>
+          <input
+            type="number"
+            class="input w-full"
+            placeholder="Starts per second"
+            min="1"
+            value="100"
+            required
+            name="starts_per_second"
+          />
+        </label>
+        <label class="floating-label">
+          <span>Total users</span>
+          <input
+            type="number"
+            class="input w-full"
+            placeholder="Total users"
+            name="total_users"
+            value="1000"
+            min="1"
+            required
+          />
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Run time</legend>
+      <input
+        type="number"
+        class="input w-full"
+        placeholder="Run time"
+        min="1"
+        name="runtime"
+        value="10"
+        required
+      />
+    </fieldset>
+  </div>
+  <div class="mt-8">
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Log</legend>
+      <textarea
+        id="log"
+        placeholder="..."
+        class="textarea w-full"
+        rows="5"
+      ></textarea>
+    </fieldset>
+  </div>
+</form>

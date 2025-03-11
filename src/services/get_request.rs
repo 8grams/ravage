@@ -9,6 +9,16 @@ use crate::{
     schema::{request_headers, requests},
 };
 
+pub async fn get_collection_requests(
+    conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
+    collection_id: i32,
+) -> Result<Vec<Request>, diesel::result::Error> {
+    requests::table
+        .select(Request::as_select())
+        .filter(requests::collection_id.eq(collection_id))
+        .get_results(conn)
+}
+
 pub async fn get_single_request(
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
     request_id: i32,

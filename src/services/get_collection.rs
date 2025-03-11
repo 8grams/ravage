@@ -10,11 +10,10 @@ use diesel::{
 
 pub async fn get_main_collections(
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
-) -> Vec<Collection> {
+) -> Result<Vec<Collection>, Error> {
     collections::table
         .select(Collection::as_select())
         .get_results(conn)
-        .unwrap()
 }
 
 pub async fn get_single_collection(

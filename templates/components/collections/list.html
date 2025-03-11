@@ -1,6 +1,6 @@
-<li
-  x-data="{open : {%if COLLECTION_ID and COLLECTION_ID == collection.id %}true{%else%}false{%endif%}}"
->
+<!-- prettier-ignore -->
+{% set is_open = COLLECTION_ID and COLLECTION_ID == collection.id  %}
+<li x-data="{ open : {{is_open}} }">
   <div
     class="menu-dropdown-toggle group relative"
     x-bind:class="open?'menu-dropdown-show':''"
@@ -9,13 +9,17 @@
       folder
     </span>
     <span> {{collection.name}} </span>
-    <span
+    <!-- prettier-ignore -->
+    <a
+      {% if not is_open %}
+      href="/collections/{{collection.id}}"
+      {%endif%}
       x-on:click="open=!open"
       class="absolute w-full h-full top-0 left-0"
       role="button"
       aria-label="open"
     >
-    </span>
+    </a>
     {% include "components/collections/collection_option.html" %}
   </div>
   <ul class="menu-dropdown" x-bind:class="{'menu-dropdown-show':open}">

@@ -47,6 +47,9 @@ CREATE TABLE load_tests (
   source_id INTEGER,
   name TEXT NOT NULL,
   log_path TEXT,
+  error_log_path TEXT,
+  request_log_path TEXT,
+  debug_log_path TEXT,
   report_path TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP

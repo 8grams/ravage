@@ -16,7 +16,7 @@ pub async fn new_request(
     let conn = &mut state.pool.get().unwrap();
     let mut ctx = tera::Context::new();
     ctx.insert("COLLECTION_ID", &query_params.collection_id);
-    let collections = get_main_collections(conn).await;
+    let collections = get_main_collections(conn).await.unwrap();
     ctx.insert("collections", &collections);
     let rendered = state.tera.render("pages/requests/form.html", &ctx).unwrap();
     HttpResponse::Ok().body(rendered)

@@ -45,6 +45,7 @@ pub async fn serve_static_file(req: HttpRequest) -> Result<HttpResponse, actix_w
             "jpg" => "image/jpeg",
             "gif" => "image/gif",
             "svg" => "image/svg+xml",
+            "html" => "text/html",
             _ => "text/plain",
         };
         let data = content.data;

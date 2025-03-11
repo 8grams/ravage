@@ -1,42 +1,35 @@
-use chrono::Utc;
+use crate::models::{collection::Collection, request::Request};
 use goose::prelude::*;
-use std::fs::create_dir_all;
+use std::sync::OnceLock;
 use tokio::task::spawn;
 
-use crate::models::{collection::Collection, request::Request};
-
 pub struct LoadTestConfig {
-    user_count: i32,
+    pub follow: bool,
+    pub load_test_id: i32,
+    pub starts_per_second: usize,
+    pub total_users: usize,
+    pub timeout: String,
+    pub runtime: usize,
+    pub log_path: String,
+    pub report_path: String,
 }
 
-pub async fn goose_loadtest(collection: Collection, request: Option<Request>) {
-    let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
-    let report_file_name = format!("report_{}.html", timestamp);
-    let log_file_name = format!("log_{}.txt", timestamp);
+// Global static OnceLock to store the request safely
+static REQUEST_DATA: OnceLock<Request> = OnceLock::new();
 
-    let log_dir = "./static/log";
-    let report_dir = "./static/report";
-    if let Err(e) = create_dir_all(log_dir) {
-        eprintln!("Failed to create log directory: {}", e);
-        return;
-    }
-    if let Err(e) = create_dir_all(report_dir) {
-        eprintln!("Failed to create report directory: {}", e);
-        return;
+pub async fn goose_loadtest(
+    collection: Collection,
+    request: Option<Request>,
+    config: LoadTestConfig,
+) {
+    // Store request in OnceLock for use in transactions
+    if let Some(req) = request {
+        let _ = REQUEST_DATA.set(req); // Ignores error if already set
     }
 
     // Spawn the load test in the background
     spawn(async move {
-        if let Err(e) = run_goose_loadtest(
-            collection,
-            request,
-            report_file_name,
-            log_file_name,
-            report_dir,
-            log_dir,
-        )
-        .await
-        {
+        if let Err(e) = run_goose_loadtest(collection, config).await {
             eprintln!("Goose load test failed: {}", e);
         }
     });
@@ -44,33 +37,79 @@ pub async fn goose_loadtest(collection: Collection, request: Option<Request>) {
 
 async fn run_goose_loadtest(
     collection: Collection,
-    request: Option<Request>,
-    report_file_name: String,
-    log_file_name: String,
-    report_dir: &str,
-    log_dir: &str,
+    config: LoadTestConfig,
 ) -> Result<(), goose::GooseError> {
+    // Build the GooseAttack configuration
     let mut goose = GooseAttack::initialize()?
         .register_scenario(
             scenario!("LoadtestTransactions")
-                .register_transaction(transaction!(loadtest_transaction)),
+                .register_transaction(transaction!(loadtest_transaction).set_on_start())
+                .register_transaction(transaction!(loadtest_transaction_repeat)),
         )
         .set_default(GooseDefault::Host, collection.host.as_str())?
-        .set_default(
-            GooseDefault::ReportFile,
-            format!("{}/{}", report_dir, report_file_name).as_str(),
-        )?
-        .set_default(
-            GooseDefault::GooseLog,
-            format!("{}/{}", log_dir, log_file_name).as_str(),
-        )?;
+        .set_default(GooseDefault::ReportFile, config.report_path.as_str())?
+        .set_default(GooseDefault::RequestLog, config.log_path.as_str())?;
 
+    // Apply the config values
+    goose = goose.set_default(GooseDefault::StartupTime, config.starts_per_second)?;
+    goose = goose.set_default(GooseDefault::Users, config.total_users)?;
+    goose = goose.set_default(GooseDefault::Timeout, config.timeout.as_str())?;
+    goose = goose.set_default(GooseDefault::RunTime, config.runtime)?;
+    goose = goose.set_default(GooseDefault::StickyFollow, config.follow)?;
+
+    // Execute the load test
     goose.execute().await?;
     Ok(())
 }
 
-// Sample transaction function
+// Initial transaction that runs once per user on start
 async fn loadtest_transaction(user: &mut GooseUser) -> TransactionResult {
-    let _response = user.get("/").await?;
+    perform_request(user).await
+}
+
+// Repeated transaction that runs continuously during the load test
+async fn loadtest_transaction_repeat(user: &mut GooseUser) -> TransactionResult {
+    perform_request(user).await
+}
+
+// Shared function to perform the actual request based on the method
+async fn perform_request(user: &mut GooseUser) -> TransactionResult {
+    // Retrieve the request from OnceLock
+    if let Some(request) = REQUEST_DATA.get() {
+        println!("Request found!");
+        let path = &request.path;
+        let body_content = request.body_content.clone().unwrap_or_default();
+
+        // Determine which HTTP method to use
+        match request.method.to_uppercase().as_str() {
+            "GET" => {
+                println!("GET METHOD");
+                user.get(path).await?;
+            }
+            "POST" => {
+                println!("POST METHOD");
+                if let Some(body_type) = &request.body_type {
+                    match body_type.as_str() {
+                        "json" | "form" => {
+                            user.post(path, body_content).await?;
+                        }
+                        _ => {
+                            user.post(path, body_content).await?;
+                        }
+                    }
+                } else {
+                    user.post(path, "").await?;
+                }
+            }
+            _ => {
+                println!("DEFAULT METHOD");
+                user.get(path).await?;
+            }
+        }
+    } else {
+        // If no specific request is provided, use default collection endpoint
+        user.get("").await?;
+    }
+
     Ok(())
 }
