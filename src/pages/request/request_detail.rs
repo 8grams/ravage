@@ -16,7 +16,7 @@ pub async fn request_detail(path: web::Path<i32>, state: web::Data<AppState>) ->
     if let Ok(headers) = get_request_headers(conn, req_id).await {
         ctx.insert("headers", &headers);
     };
-    let collections = get_main_collections(conn).await;
+    let collections = get_main_collections(conn).await.unwrap();
 
     ctx.insert("collections", &collections);
     if let Ok(request) = requests::table

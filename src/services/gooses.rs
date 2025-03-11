@@ -1,6 +1,6 @@
 use chrono::Utc;
 use goose::prelude::*;
-use std::fs::create_dir_all;
+use std::fs::{create_dir_all, write};
 use tokio::task::spawn;
 
 use crate::models::{collection::Collection, request::Request};
@@ -56,12 +56,13 @@ async fn run_goose_loadtest(
                 .register_transaction(transaction!(loadtest_transaction)),
         )
         .set_default(GooseDefault::Host, collection.host.as_str())?
+        .set_default(GooseDefault::RunTime, 10)?
         .set_default(
             GooseDefault::ReportFile,
             format!("{}/{}", report_dir, report_file_name).as_str(),
         )?
         .set_default(
-            GooseDefault::GooseLog,
+            GooseDefault::RequestLog,
             format!("{}/{}", log_dir, log_file_name).as_str(),
         )?;
 
