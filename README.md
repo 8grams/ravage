@@ -13,7 +13,7 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 - [Rust](https://www.rust-lang.org/) as main programming language
 - [Goose](https://github.com/tag1consulting/goose) as the load testing tool behind the scenes
 - [HTMX](https://htmx.org/) and [AlpineJS](https://alpinejs.dev/) as JS Framework
-- [Tailwind](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) as CSS Framework 
+- [Tailwind](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) as CSS Framework
 
 ## Local Development
 
@@ -23,7 +23,7 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 - pnpm
 - [Rustup](https://rustup.rs/)
 
-### Prepare 
+### Prepare
 
 Create `.env` file from `.env.template`
 
@@ -37,6 +37,18 @@ Run
 make init
 ```
 
+## Install Diesel
+
+```
+make diesel-instal
+```
+
+## Run migration
+
+```
+make migrate-up
+```
+
 ### Run Application
 
 ```bash
@@ -45,11 +57,12 @@ make dev
 
 ## Run on Production
 
-The fastest way  to get started is by using Docker. First, create `.env` file, then run:
+The fastest way to get started is by using Docker. First, create `.env` file, then run:
 
 ```
-docker run -v .:/opt/data -p 8080:8080 ghcr.io/8grams/ravage  
+docker run -v .:/opt/data -p 8080:8080 ghcr.io/8grams/ravage
 ```
 
-Once the container is running, open your browser and go to `http://localhost:8080`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file. 
+Once the container is running, open your browser and go to `http://localhost:8080`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
 It's very recommended to use Reverse Proxy like Nginx.
+
