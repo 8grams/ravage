@@ -1,0 +1,30 @@
+<li
+  x-data="{open : {%if COLLECTION_ID and COLLECTION_ID == collection.id %}true{%else%}false{%endif%}}"
+>
+  <div
+    class="menu-dropdown-toggle group relative"
+    x-bind:class="open?'menu-dropdown-show':''"
+  >
+    <span class="material-symbols-rounded" style="font-size: 18px">
+      folder
+    </span>
+    <span> {{collection.name}} </span>
+    <span
+      x-on:click="open=!open"
+      class="absolute w-full h-full top-0 left-0"
+      role="button"
+      aria-label="open"
+    >
+    </span>
+    {% include "components/collections/collection_option.html" %}
+  </div>
+  <ul class="menu-dropdown" x-bind:class="{'menu-dropdown-show':open}">
+    <div
+      hx-get="/api/collections/{{collection.id}}/childrens"
+      hx-swap="outerHTML"
+      hx-trigger="revealed"
+    >
+      <span class="loading loading-dots loading-xs"></span>
+    </div>
+  </ul>
+</li>

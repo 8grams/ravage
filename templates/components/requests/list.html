@@ -1,0 +1,9 @@
+<li>
+  <div class="relative">
+    <a href="/requests/{{request.id}}" class="stretch-link">
+      <span class="badge badge-xs"> {{request.method}} </span>
+      <span>{{request.name}}</span>
+    </a>
+    {% include "components/requests/request_option.html" %}
+  </div>
+</li>

@@ -37,7 +37,7 @@ diesel::table! {
 diesel::table! {
     request_headers (id) {
         id -> Integer,
-        request_id -> Nullable<Integer>,
+        request_id -> Integer,
         key -> Text,
         value -> Text,
         created_at -> Timestamp,
@@ -49,11 +49,11 @@ diesel::table! {
     requests (id) {
         id -> Integer,
         name -> Text,
-        collection_id -> Nullable<Integer>,
+        collection_id -> Integer,
         path -> Text,
         method -> Text,
-        body_type -> Text,
-        body_content -> Text,
+        body_type -> Nullable<Text>,
+        body_content -> Nullable<Text>,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
     }

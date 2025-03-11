@@ -19,8 +19,9 @@ pub struct LoadTest {
 
 #[derive(Insertable)]
 #[diesel(table_name=load_tests)]
-pub struct NewLoadTest<'a> {
-    pub source_type: &'a str,
-    pub source_id: &'a i32,
-    pub name: &'a str,
+pub struct NewLoadTest {
+    pub source_type: String,
+    pub source_id: i32,
+    pub log_path: String,
+    pub name: String,
 }

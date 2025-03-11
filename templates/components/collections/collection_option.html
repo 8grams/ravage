@@ -18,10 +18,20 @@
       </button>
     </li>
     <li>
+      <button
+        hx-get="/api/load_tests/new?collection_id={{collection.id}}"
+        hx-target="#modal"
+      >
+        Load Test
+      </button>
+    </li>
+    <li>
+      <a href="/requests/new?collection_id={{collection.id}}">New Request</a>
+    </li>
+    <li>
       <button hx-delete="/api/collections/{{collection.id}}?refresh=true">
         Delete
       </button>
     </li>
-    <li><a>New Request</a></li>
   </ul>
 </div>

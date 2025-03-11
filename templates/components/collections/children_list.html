@@ -1,0 +1,9 @@
+{%for request in requests%}
+<!-- separator -->
+{%include "components/requests/list.html"%}
+<!-- separator -->
+{%endfor%}
+<!-- separator -->
+{% if not requests %}
+<p class="py-2">No requests found</p>
+{%endif%}

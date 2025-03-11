@@ -1,69 +1,124 @@
-<form>
-  <div class="text-end">
-    <button class="btn btn-neutral">Save</button>
-    <button class="btn btn-primary">Run</button>
-  </div>
-  <div class="mt-8 space-y-4">
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Request Name</legend>
-      <input type="text" class="input w-full" placeholder="Request Name" />
-    </fieldset>
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Path</legend>
-      <div class="flex gap-2">
-        <input type="text" class="input w-full" placeholder="/api/request" />
-        <select class="select w-max" required>
-          <option disabled selected>METHOD</option>
-          <option>GET</option>
-          <option>POST</option>
-          <option>PUT</option>
-          <option>PATCH</option>
-          <option>DELETE</option>
-        </select>
-      </div>
-    </fieldset>
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Headers</legend>
-      <div class="flex gap-2">
-        <input type="text" class="input w-full" placeholder="Key" />
-        <input type="text" class="input w-full" placeholder="Value" />
-        <button type="button" class="btn btn-square">
-          <span class="material-symbols-rounded"> delete </span>
-        </button>
-      </div>
-    </fieldset>
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Body</legend>
-      <div class="flex gap-4">
-        <label>
+<div>
+  <form
+    hx-post="/api/requests{% if request%}/{{request.id}}{%endif%}?refresh={%if request%}true{%else%}false{%endif%}"
+    hx-ext="json-enc"
+  >
+    <input
+      type="number"
+      class="hidden"
+      name="collection_id"
+      value="{{request.collection_id | default(value=COLLECTION_ID)}}"
+    />
+    <div class="text-end">
+      <button class="btn btn-neutral" type="submit">Save</button>
+      {%if request %}
+      <button
+        class="btn btn-success"
+        type="button"
+        hx-post="/api/requests/{{request.id}}/run"
+        hx-target="#log"
+        hx-swap="innerHTML"
+      >
+        Run
+      </button>
+      {%endif%}
+    </div>
+    <div class="mt-8 space-y-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Request Name</legend>
+        <input
+          type="text"
+          class="input w-full"
+          name="name"
+          required
+          placeholder="Request Name"
+          value="{{request.name|default(value='')}}"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Path</legend>
+        <div class="flex gap-2">
           <input
-            type="radio"
-            name="radio-3"
-            class="radio radio-sm radio-neutral"
-            checked="checked"
+            name="path"
+            required
+            type="text"
+            class="input w-full"
+            placeholder="/api/request"
+            pattern="^\/[a-zA-Z0-9-_\/]*$"
+            value="{{request.path|default(value='')}}"
           />
-          <span>JSON</span>
-        </label>
-        <label>
-          <input
+          {% set methods = ["GET","POST","PUT","PATCH","DELETE","HEAD"] %}
+          <select class="select w-max" required name="method">
+            <!-- prettier-ignore -->
+            <option disabled {%if not request %}selected{%endif%} value="">METHOD</option>
+            {% for method in methods %}
+            <!-- prettier-ignore -->
+            <option {%if request and request.method == method %}selected{%endif%}>{{method}}</option>
+            {%endfor%}
+          </select>
+        </div>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Headers</legend>
+        {% include "components/form_header.html" %}
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Body</legend>
+        <div class="flex gap-4">
+          <label>
+            <!-- prettier-ignore -->
+            <input
             type="radio"
-            name="radio-3"
+            name="body_type"
             class="radio radio-sm radio-neutral"
+            {%if request and request.body_type == 'application/json' or not request %}checked{%endif%}
+            value="application/json"
           />
-          <span>Form Data</span>
-        </label>
-        <label>
-          <input
+            <span>JSON</span>
+          </label>
+          <label>
+            <!-- prettier-ignore -->
+            <input
             type="radio"
-            name="radio-3"
+            name="body_type"
             class="radio radio-sm radio-neutral"
+            value="multipart/form-data"
+            {%if request and request.body_type == 'multipart/form-data' %}checked{%endif%}
           />
-          <span>Query Params</span>
-        </label>
-      </div>
-      <div class="mt-4">
-        <textarea class="textarea w-full" rows="5" placeholder="..."></textarea>
-      </div>
-    </fieldset>
-  </div>
-</form>
+            <span>multipart/form-data</span>
+          </label>
+          <label>
+            <!-- prettier-ignore -->
+            <input
+            type="radio"
+            class="radio radio-sm radio-neutral"
+            name="body_type"
+            {%if request and request.body_type == 'application/x-www-form-urlencoded' %}checked{%endif%}
+            value="application/x-www-form-urlencoded"
+          />
+            <span>x-www-form-urlencoded</span>
+          </label>
+        </div>
+        <div class="mt-4">
+          <!-- prettier-ignore -->
+          <textarea
+            class="textarea w-full"
+            rows="5"
+            placeholder="..."
+            name="body_content"
+          >{{request.body_content | default(value='')}}</textarea>
+        </div>
+      </fieldset>
+    </div>
+  </form>
+  {% if request %}
+  <legend class="fieldset-legend">Response</legend>
+  <textarea
+    id="log"
+    readonly
+    placeholder="..."
+    class="textarea w-full mt-2"
+    rows="5"
+  ></textarea>
+  {% endif %}
+</div>
