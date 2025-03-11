@@ -38,11 +38,17 @@ RUN strip -s target/release/ravage
 CMD ["/app/target/release/ravage"]
 
 # final outcome
-FROM gcr.io/distroless/cc-debian12
+FROM debian:12.9-slim
+RUN apt update && apt install -y nginx supervisor
 WORKDIR /app
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
+
 COPY --from=builder /app/target/release/ravage ./
-COPY --from=builder /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/
-EXPOSE 8080
-CMD ["./ravage"]
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
+
+RUN mkdir -p /var/log/supervisor \
+    && mkdir -p /var/run/supervisor \
+    && chmod -R 777 /var/run/supervisor \
+    && chmod -R 777 /var/log/supervisor
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
