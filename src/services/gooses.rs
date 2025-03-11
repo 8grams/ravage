@@ -76,21 +76,18 @@ async fn loadtest_transaction_repeat(user: &mut GooseUser) -> TransactionResult 
 async fn perform_request(user: &mut GooseUser) -> TransactionResult {
     // Retrieve the request from OnceLock
     if let Some(request) = REQUEST_DATA.get() {
-        println!("Request found!");
         let path = &request.path;
         let body_content = request.body_content.clone().unwrap_or_default();
 
         // Determine which HTTP method to use
         match request.method.to_uppercase().as_str() {
             "GET" => {
-                println!("GET METHOD");
                 user.get(path).await?;
             }
             "POST" => {
-                println!("POST METHOD");
                 if let Some(body_type) = &request.body_type {
                     match body_type.as_str() {
-                        "json" | "form" => {
+                        "application/json" => {
                             user.post(path, body_content).await?;
                         }
                         _ => {
@@ -102,7 +99,6 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
                 }
             }
             _ => {
-                println!("DEFAULT METHOD");
                 user.get(path).await?;
             }
         }
