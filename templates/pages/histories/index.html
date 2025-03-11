@@ -19,8 +19,10 @@
           <td>{{history.created_at}}</td>
           <td>{{history.name}}</td>
           <td>
-            <a href="{{history.log_path}}">Log</a>
-            <a href="{{history.report_path}}">Report</a>
+            <div class="flex gap-4">
+              <a class="link" href="{{history.log_path}}">Log</a>
+              <a class="link" href="{{history.report_path}}">Report</a>
+            </div>
           </td>
         </tr>
         {%endfor%}

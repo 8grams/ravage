@@ -1,3 +1,5 @@
+use std::env;
+
 use actix_web::{HttpResponse, Responder, web};
 use chrono::Utc;
 use serde::Deserialize;
@@ -5,6 +7,7 @@ use tokio::fs::create_dir_all;
 
 use crate::app_state::AppState;
 use crate::models::load_test::NewLoadTest;
+use crate::models::request::Request;
 use crate::services::get_collection::get_single_collection;
 use crate::services::get_request::get_single_request;
 use crate::services::gooses::{LoadTestConfig, goose_loadtest};
@@ -33,16 +36,17 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap_or("0".into())
         .parse::<i32>()
         .unwrap();
-    let req = get_single_request(conn, request_id);
+    let mut request: Option<Request> = None;
+    if let Ok(req) = get_single_request(conn, request_id).await {
+        request = Some(req);
+    };
 
+    let data_dir = env::var("DATA_DIR").unwrap_or("./data".into()).to_string();
     let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
     let report_file_name = format!("report_{}.html", timestamp);
     let log_file_name = format!("log_{}.txt", timestamp);
-    let log_dir = "./static/log";
-    let report_dir = "./static/report";
 
-    create_dir_all(log_dir).await.unwrap();
-    create_dir_all(report_dir).await.unwrap();
+    create_dir_all(data_dir.clone()).await.unwrap();
 
     let _ = insert_loadtest(
         &mut state.pool.get().unwrap(),
@@ -50,8 +54,8 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             name: json_data.name,
             source_type: json_data.collection_id.clone(),
             source_id: collection_id,
-            log_path: format!("/log/{}", log_file_name),
-            report_path: format!("/report/{}", report_file_name),
+            log_path: format!("/data/{}", log_file_name),
+            report_path: format!("/data/{}", report_file_name),
         },
     )
     .await;
@@ -75,7 +79,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
 
     let _ = goose_loadtest(
         coll,
-        None,
+        request,
         LoadTestConfig {
             load_test_id: 0,
             starts_per_second,
@@ -83,8 +87,8 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             runtime,
             follow,
             total_users,
-            log_path: format!("{}/{}", log_dir, log_file_name),
-            report_path: format!("{}/{}", report_dir, report_file_name),
+            log_path: format!("{}/{}", data_dir.clone(), log_file_name),
+            report_path: format!("{}/{}", data_dir, report_file_name),
         },
     )
     .await;

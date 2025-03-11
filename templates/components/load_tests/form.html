@@ -5,7 +5,10 @@
   hx-swap="innerHTML"
 >
   <div class="text-end">
-    <input type="hidden" name="collection_id" value="{{collection.id}}" />
+    <input type="hidden" name="collection_id" value="{{COLLECTION_ID}}" />
+    {% if REQUEST_ID %}
+    <input type="hidden" name="request_id" value="{{REQUEST_ID}}" />
+    {% endif %}
     <button class="btn btn-success">Run</button>
   </div>
   <fieldset class="fieldset">
