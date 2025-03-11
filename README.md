@@ -48,9 +48,9 @@ make dev
 The fastest way  to get started is by using Docker. First, create `.env` file, then run:
 
 ```
-docker run -v .:/opt/data/db -p 8080:8080 ghcr.io/8grams/ravage  
+docker run -v .:/opt/data -p 8080:8080 ghcr.io/8grams/ravage  
 ```
 
-`/opt/data` is configured via the `.env` file, so adjust it according to your preferred value. 
+`/opt/data` is configured via `DATA_DIR` key in `.env` file, so adjust it according to your preferred value. 
 Once the container is running, open your browser and go to `http://localhost:8080`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file. 
 It's very recommended to use Reverse Proxy like Nginx.
