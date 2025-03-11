@@ -99,7 +99,6 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
                 }
             }
             _ => {
-                println!("DEFAULT METHOD");
                 user.get(path).await?;
             }
         }
