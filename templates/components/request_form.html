@@ -111,14 +111,13 @@
     </div>
   </form>
   {% if request %}
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend">Response</legend>
-    <textarea
-      id="log"
-      class="textarea w-full mt-10"
-      rows="10"
-      readonly
-    ></textarea>
-  </fieldset>
+  <legend class="fieldset-legend">Response</legend>
+  <textarea
+    id="log"
+    readonly
+    placeholder="..."
+    class="textarea w-full mt-2"
+    rows="5"
+  ></textarea>
   {% endif %}
 </div>

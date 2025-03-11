@@ -45,7 +45,15 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let refresh = req.query_string().contains("refresh=true");
+        let query = req.query_string();
+        let refresh = query.contains("refresh=true");
+        let location = query.split('&').find_map(|pair| {
+            let mut split = pair.splitn(2, '=');
+            match (split.next(), split.next()) {
+                (Some("location"), Some(value)) => Some(value.to_string()),
+                _ => None,
+            }
+        });
         let fut = self.service.call(req);
 
         Box::pin(async move {
@@ -56,6 +64,14 @@ where
                     HeaderName::from_static("hx-refresh"),
                     HeaderValue::from_static("true"),
                 );
+            }
+            if let Some(location_url) = location {
+                if HeaderValue::from_str(&location_url).is_ok() {
+                    res.headers_mut().insert(
+                        HeaderName::from_static("hx-location"),
+                        HeaderValue::from_str(&location_url).unwrap(),
+                    );
+                }
             }
 
             Ok(res.map_into_left_body())
