@@ -31,19 +31,21 @@ Create `.env` file from `.env.template`
 cp .env.template .env
 ```
 
+### Initialize dependencies
+
 Run
 
 ```bash
 make init
 ```
 
-## Install Diesel
+Install Diesel
 
 ```
 make diesel-instal
 ```
 
-## Run migration
+Run migration
 
 ```
 make migrate-up
