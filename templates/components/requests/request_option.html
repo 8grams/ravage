@@ -9,16 +9,16 @@
     class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
   >
     <li>
-      <a href="/collections/{{request.collection_id}}?request={{request.id}}"
-        >Edit</a
-      >
-    </li>
-    <li>
       <a
         href="/collections/{{request.collection_id}}/loadtest?request={{request.id}}"
       >
         Load Test
       </a>
+    </li>
+    <li>
+      <a href="/collections/{{request.collection_id}}?request={{request.id}}"
+        >Edit</a
+      >
     </li>
     <li>
       <button hx-delete="/api/requests/{{request.id}}?location=/">
