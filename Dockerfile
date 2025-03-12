@@ -47,7 +47,7 @@ RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/diesel-rs/diesel/re
 COPY --from=builder /app/target/release/ravage ./
 COPY ./migrations ./migrations
 COPY ./docker/supervisord.conf /etc/supervisord.conf
-COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/default.conf /etc/nginx/sites-available/default
 COPY ./start.sh ./start.sh
 
 RUN mkdir -p /var/log/supervisor \
