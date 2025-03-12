@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 
 use actix_web::{HttpResponse, Responder, web};
@@ -8,8 +9,8 @@ use tokio::fs::create_dir_all;
 use crate::app_state::AppState;
 use crate::models::load_test::NewLoadTest;
 use crate::models::request::Request;
-use crate::services::get_collection::get_single_collection;
-use crate::services::get_request::get_single_request;
+use crate::services::get_collection::{get_collection_headers, get_single_collection};
+use crate::services::get_request::{get_request_headers, get_single_request};
 use crate::services::gooses::{LoadTestConfig, goose_loadtest};
 use crate::services::loadtest_services::insert_loadtest;
 use crate::utils::monitor_logs::get_or_create_channel;
@@ -29,6 +30,7 @@ pub struct JsonData {
 pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
     let json_data = data.into_inner();
+    let mut headers: HashMap<String, String> = HashMap::new();
 
     let collection_id = json_data.collection_id.parse::<i32>().unwrap();
     let coll = get_single_collection(conn, collection_id).await.unwrap();
@@ -37,9 +39,16 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap_or("0".into())
         .parse::<i32>()
         .unwrap();
+
+    if let Ok(hdrs) = get_collection_headers(conn, collection_id).await {
+        headers = hdrs.into_iter().map(|h| (h.key, h.value)).collect();
+    }
     let mut request: Option<Request> = None;
     if let Ok(req) = get_single_request(conn, request_id).await {
-        request = Some(req);
+        request = Some(req.clone());
+        if let Ok(hdrs) = get_request_headers(conn, req.id).await {
+            headers = hdrs.into_iter().map(|h| (h.key, h.value)).collect()
+        }
     };
 
     let data_dir = env::var("DATA_DIR")
@@ -94,6 +103,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             total_users,
             log_path: format!("{}/{}", data_dir.clone(), log_file_name),
             report_path: format!("{}/{}", data_dir, report_file_name),
+            headers: Some(headers),
         },
         sender,
     )
