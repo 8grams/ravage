@@ -12,7 +12,7 @@
   <div class="mt-8 font-semibold text-lg">Configuration</div>
   <div class="mt-4 space-y-4">
     <fieldset class="fieldset">
-      <legend class="fieldset-legend text-base">Timeout</legend>
+      <legend class="fieldset-legend text-base">Per-request Timeout (seconds)</legend>
       <input
         type="text"
         class="input w-full"
@@ -33,7 +33,7 @@
             class="input w-full"
             placeholder="Starts per second"
             min="1"
-            value="1"
+            value="50"
             required
             name="starts_per_second"
           />
@@ -45,7 +45,19 @@
             class="input w-full"
             placeholder="Total users"
             name="total_users"
-            value="1000"
+            value="500"
+            min="1"
+            required
+          />
+        </label>
+        <label class="floating-label">
+          <span>Launch all users in (seconds)</span>
+          <input
+            type="number"
+            class="input w-full"
+            placeholder="Launch all users in"
+            name="launch_all_users"
+            value="30"
             min="1"
             required
           />
@@ -53,14 +65,14 @@
       </div>
     </fieldset>
     <fieldset class="fieldset">
-      <legend class="fieldset-legend text-base">Run time</legend>
+      <legend class="fieldset-legend text-base">Execution Time (seconds)</legend>
       <input
         type="number"
         class="input w-full"
         placeholder="Run time"
         min="1"
         name="runtime"
-        value="10"
+        value="30"
         required
       />
     </fieldset>

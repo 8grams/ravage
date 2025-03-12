@@ -60,7 +60,7 @@
       </fieldset>
       {% if default_headers %}
       <fieldset class="fieldset">
-        <legend class="fieldset-legend text-base">Default Headers</legend>
+        <legend class="fieldset-legend text-base">Collection Headers</legend>
         {% for header in default_headers %}
         <div class="flex gap-2">
           <label class="floating-label">
@@ -85,7 +85,7 @@
           </label>
         </div>
         {%endfor%}
-        <p class="fieldset-label">Default headers can be overridden</p>
+        <p class="fieldset-label">Collection headers can be overridden</p>
       </fieldset>
       {%endif%}
       <fieldset class="fieldset">
@@ -104,7 +104,7 @@
             {%if request and request.body_type == 'application/json' or not request %}checked{%endif%}
             value="application/json"
           />
-            <span>JSON</span>
+            <span>json</span>
           </label>
           <label>
             <!-- prettier-ignore -->

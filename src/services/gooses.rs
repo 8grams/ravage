@@ -12,6 +12,7 @@ pub struct LoadTestConfig {
     pub follow: bool,
     pub load_test_id: i32,
     pub starts_per_second: usize,
+    pub launch_all_users: usize,
     pub total_users: usize,
     pub timeout: String,
     pub runtime: usize,
@@ -70,7 +71,8 @@ async fn run_goose_loadtest(
         .set_default(GooseDefault::ReportFile, config.report_path.as_str())?
         .set_default(GooseDefault::RequestLog, config.log_path.as_str())?;
 
-    goose = goose.set_default(GooseDefault::StartupTime, config.starts_per_second)?;
+    goose = goose.set_default(GooseDefault::HatchRate, config.starts_per_second)?;
+    goose = goose.set_default(GooseDefault::StartupTime, config.launch_all_users)?;
     goose = goose.set_default(GooseDefault::Users, config.total_users)?;
     goose = goose.set_default(GooseDefault::Timeout, config.timeout.as_str())?;
     goose = goose.set_default(GooseDefault::RunTime, config.runtime)?;

@@ -22,6 +22,7 @@ pub struct JsonData {
     request_id: Option<String>,
     timeout: Option<String>,
     starts_per_second: Option<String>,
+    launch_all_users: Option<String>,
     total_users: Option<String>,
     follow: Option<String>,
     runtime: Option<String>,
@@ -76,17 +77,22 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     let timeout = json_data.timeout.unwrap_or("100".into());
     let starts_per_second: usize = json_data
         .starts_per_second
-        .unwrap_or("10".into())
+        .unwrap_or("50".into())
+        .parse::<usize>()
+        .unwrap();
+    let launch_all_users: usize = json_data
+        .launch_all_users
+        .unwrap_or("30".into())
         .parse::<usize>()
         .unwrap();
     let total_users: usize = json_data
         .total_users
-        .unwrap_or("10".into())
+        .unwrap_or("500".into())
         .parse::<usize>()
         .unwrap();
     let runtime: usize = json_data
         .runtime
-        .unwrap_or("10".into())
+        .unwrap_or("30".into())
         .parse::<usize>()
         .unwrap();
     let follow: bool = json_data.follow.unwrap_or("on".into()) == "on";
@@ -97,6 +103,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         LoadTestConfig {
             load_test_id: lt.id,
             starts_per_second,
+            launch_all_users,
             timeout,
             runtime,
             follow,
