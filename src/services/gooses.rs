@@ -16,9 +16,9 @@ pub struct LoadTestConfig {
     pub report_path: String,
 }
 
-// Global static OnceLock to store the request safely
+// Global static OnceLock to store the request and log sender safely
 static REQUEST_DATA: OnceLock<Arc<RwLock<Option<Request>>>> = OnceLock::new();
-static LOG_SENDER: OnceLock<Sender<String>> = OnceLock::new();
+static LOG_SENDER: OnceLock<Arc<RwLock<Option<Sender<String>>>>> = OnceLock::new();
 
 pub async fn goose_loadtest(
     collection: Collection,
@@ -27,11 +27,17 @@ pub async fn goose_loadtest(
     sender: Sender<String>,
 ) {
     let request_data = REQUEST_DATA.get_or_init(|| Arc::new(RwLock::new(None)));
+    let log_sender = LOG_SENDER.get_or_init(|| Arc::new(RwLock::new(None)));
+
+    // Store the new request if provided
     if let Some(req) = request {
         let mut stored_request = request_data.write().await;
         *stored_request = Some(req);
     }
-    let _ = LOG_SENDER.set(sender);
+
+    // Store the new sender
+    let mut log_sender_lock = log_sender.write().await;
+    *log_sender_lock = Some(sender);
 
     spawn(async move {
         if let Err(e) = run_goose_loadtest(collection, config).await {
@@ -60,7 +66,10 @@ async fn run_goose_loadtest(
     goose = goose.set_default(GooseDefault::RunTime, config.runtime)?;
     goose = goose.set_default(GooseDefault::StickyFollow, config.follow)?;
 
-    if let Some(sender) = LOG_SENDER.get() {
+    let log_sender = LOG_SENDER.get().expect("FAILED LOG SENDER");
+    let sender = log_sender.read().await.clone();
+
+    if let Some(sender) = sender {
         let _ = sender.send(format!(
             "🚀 Loadtest starting with {} users",
             config.total_users
@@ -71,7 +80,7 @@ async fn run_goose_loadtest(
 
     match result {
         Ok(metrics) => {
-            if let Some(sender) = LOG_SENDER.get() {
+            if let Some(sender) = log_sender.read().await.clone() {
                 let _ = sender.send(format!(
                     "✅ Load test completed in {}s with {} users",
                     metrics.duration, metrics.total_users
@@ -79,7 +88,7 @@ async fn run_goose_loadtest(
             }
         }
         Err(error) => {
-            if let Some(sender) = LOG_SENDER.get() {
+            if let Some(sender) = log_sender.read().await.clone() {
                 let _ = sender.send(format!("❌ Loadtest failed: {}", error));
             }
         }
@@ -98,13 +107,17 @@ async fn loadtest_transaction_repeat(user: &mut GooseUser) -> TransactionResult 
 
 async fn perform_request(user: &mut GooseUser) -> TransactionResult {
     let request_data = REQUEST_DATA.get().expect("FAILED REQUEST DATA");
+    let log_sender = LOG_SENDER.get().expect("FAILED LOG SENDER");
+
     if let Some(request) = request_data.read().await.as_ref() {
         let path = &request.path;
         let method = request.method.to_uppercase();
         let body_content = request.body_content.clone().unwrap_or_default();
 
+        let sender = log_sender.read().await.clone();
+
         if user.weighted_users_index % 5 == 0 {
-            if let Some(sender) = LOG_SENDER.get() {
+            if let Some(sender) = sender.as_ref() {
                 let _ = sender.send(format!(
                     "🔄 User {}: {} {}",
                     user.weighted_users_index, method, path
@@ -117,7 +130,7 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
             _ => user.get(path).await,
         };
 
-        if let Some(sender) = LOG_SENDER.get() {
+        if let Some(sender) = sender.as_ref() {
             match result {
                 Ok(_) if user.weighted_users_index % 5 == 0 => {
                     let _ = sender.send(format!("✅ User {}: Success", user.weighted_users_index));
@@ -133,8 +146,10 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
         }
     } else {
         let result = user.get("/").await;
+        let sender = log_sender.read().await.clone();
+
         if user.weighted_users_index < 3 {
-            if let Some(sender) = LOG_SENDER.get() {
+            if let Some(sender) = sender.as_ref() {
                 let _ = sender.send(format!(
                     "🔄 User {}: Default request",
                     user.weighted_users_index
@@ -143,7 +158,7 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
         }
 
         if let Err(e) = result {
-            if let Some(sender) = LOG_SENDER.get() {
+            if let Some(sender) = sender.as_ref() {
                 let _ = sender.send(format!(
                     "❌ User {}: Error - {}",
                     user.weighted_users_index, e
