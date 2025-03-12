@@ -62,7 +62,7 @@ make dev
 The fastest way to get started is by using Docker. First, create `.env` file, then run:
 
 ```
-docker run -v .:/opt/data -p 8080:8080 ghcr.io/8grams/ravage
+docker run -v .:/opt/data -p 80:80 ghcr.io/8grams/ravage
 ```
 
 Once the container is running, open your browser and go to `http://localhost:8080`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
