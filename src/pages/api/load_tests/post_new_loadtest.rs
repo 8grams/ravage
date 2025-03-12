@@ -21,7 +21,6 @@ pub struct JsonData {
     collection_id: String,
     request_id: Option<String>,
     timeout: Option<String>,
-    starts_per_second: Option<String>,
     launch_all_users: Option<String>,
     total_users: Option<String>,
     follow: Option<String>,
@@ -75,7 +74,6 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     .unwrap();
     let sender = get_or_create_channel(&state, lt.id).await;
     let timeout = json_data.timeout.unwrap_or("100".into());
-    let starts_per_second = json_data.starts_per_second.unwrap_or("50".into());
     let launch_all_users: usize = json_data
         .launch_all_users
         .unwrap_or("30".into())
@@ -98,7 +96,6 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         request,
         LoadTestConfig {
             load_test_id: lt.id,
-            starts_per_second,
             launch_all_users,
             timeout,
             runtime,

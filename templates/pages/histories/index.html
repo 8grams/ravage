@@ -5,7 +5,6 @@
       <!-- head -->
       <thead>
         <tr>
-          <th></th>
           <th>Created</th>
           <th>Name</th>
           <th></th>
@@ -15,12 +14,11 @@
         <!-- row 1 -->
         {% for history in histories %}
         <tr>
-          <th>{{loop.index}}.</th>
-          <td>{{history.created_at}}</td>
+          <td class="created-at" data-timestamp="{{history.created_at}}"></td>
           <td>{{history.name}}</td>
           <td>
             <div class="flex gap-4">
-              <a class="link" href="{{history.log_path}}">Log</a>
+              <a class="link" target="_blank" href="{{history.log_path}}">Log</a>
               <a class="link" target="_blank" href="{{history.report_path}}">Report</a>
             </div>
           </td>
@@ -30,4 +28,14 @@
     </table>
   </div>
 </main>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const dateElements = document.querySelectorAll(".created-at");
+    dateElements.forEach(function(element) {
+      const timestamp = element.getAttribute("data-timestamp");
+      const date = new Date(timestamp);
+      element.textContent = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    });
+  });
+</script>
 {% endblock %}

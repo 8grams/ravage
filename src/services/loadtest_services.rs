@@ -14,6 +14,7 @@ pub async fn get_loadtests(
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<LoadTest>, diesel::result::Error> {
     load_tests::table
+        .order(load_tests::created_at.desc())
         .select(LoadTest::as_select())
         .get_results(conn)
 }
