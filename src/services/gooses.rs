@@ -1,6 +1,7 @@
 use crate::models::{collection::Collection, request::Request};
 use goose::prelude::*;
 use std::sync::OnceLock;
+use tokio::sync::broadcast::Sender;
 use tokio::task::spawn;
 
 pub struct LoadTestConfig {
@@ -16,16 +17,19 @@ pub struct LoadTestConfig {
 
 // Global static OnceLock to store the request safely
 static REQUEST_DATA: OnceLock<Request> = OnceLock::new();
+static LOG_SENDER: OnceLock<Sender<String>> = OnceLock::new();
 
 pub async fn goose_loadtest(
     collection: Collection,
     request: Option<Request>,
     config: LoadTestConfig,
+    sender: Sender<String>,
 ) {
     // Store request in OnceLock for use in transactions
     if let Some(req) = request {
         let _ = REQUEST_DATA.set(req); // Ignores error if already set
     }
+    let _ = LOG_SENDER.set(sender);
 
     // Spawn the load test in the background
     spawn(async move {
@@ -57,8 +61,32 @@ async fn run_goose_loadtest(
     goose = goose.set_default(GooseDefault::RunTime, config.runtime)?;
     goose = goose.set_default(GooseDefault::StickyFollow, config.follow)?;
 
+    if let Some(sender) = LOG_SENDER.get() {
+        let _ = sender.send(format!(
+            "Loadtest starting with {} users",
+            config.total_users
+        ));
+    }
     // Execute the load test
-    goose.execute().await?;
+    let result = goose.execute().await;
+
+    match result {
+        Ok(metrics) => {
+            if let Some(sender) = LOG_SENDER.get() {
+                let _ = sender.send(format!(
+                    "Loadtest success with {} users",
+                    metrics.total_users
+                ));
+                let _ = sender.send(format!("Durations {}", metrics.duration));
+            }
+        }
+        Err(error) => {
+            if let Some(sender) = LOG_SENDER.get() {
+                let _ = sender.send(format!("Loadtest failed: {}", error));
+            }
+        }
+    }
+
     Ok(())
 }
 
@@ -81,9 +109,6 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
 
         // Determine which HTTP method to use
         match request.method.to_uppercase().as_str() {
-            "GET" => {
-                user.get(path).await?;
-            }
             "POST" => {
                 if let Some(body_type) = &request.body_type {
                     match body_type.as_str() {
@@ -95,13 +120,15 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
                         }
                     }
                 } else {
-                    user.post(path, "").await?;
+                    {
+                        user.post(path, "").await?;
+                    }
                 }
             }
             _ => {
                 user.get(path).await?;
             }
-        }
+        };
     } else {
         // If no specific request is provided, use default collection endpoint
         user.get("").await?;
