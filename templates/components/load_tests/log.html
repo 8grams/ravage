@@ -8,26 +8,39 @@
     </div>
   </fieldset>
   <script>
+    let eventSourceInstance = null; // Store the current SSE instance
+
     function connectSSE(targetElement) {
       const container = document.querySelector(targetElement);
-      let url = `/api/load_tests/${container.dataset.id}/logs`;
-      const eventSource = new EventSource(url);
 
-      eventSource.addEventListener("message", (event) => {
+      if (!container) {
+        console.error("Target element not found.");
+        return;
+      }
+
+      // Close the previous connection if it exists
+      if (eventSourceInstance) {
+        eventSourceInstance.close();
+        eventSourceInstance = null;
+      }
+
+      let url = `/api/load_tests/${container.dataset.id}/logs`;
+      eventSourceInstance = new EventSource(url);
+
+      eventSourceInstance.addEventListener("message", (event) => {
         if (event.data) {
-          if (container) {
-            const messageElement = document.createElement("pre");
-            messageElement.innerHTML = event.data + "\n"; // Ensure proper HTML rendering
-            container.appendChild(messageElement); // Append new message
-            container.scrollTop = container.scrollHeight; // Scroll to bottom
-          }
+          const messageElement = document.createElement("pre");
+          messageElement.innerHTML = event.data + "\n";
+          container.appendChild(messageElement);
+          container.parentElement.scrollTop =
+            container.parentElement.scrollHeight;
         }
       });
 
-      eventSource.onerror = () => {
+      eventSourceInstance.onerror = () => {
         console.error("SSE connection lost. Retrying...");
-        eventSource.close();
-        setTimeout(() => connectSSE(url, targetElement), 3000); // Reconnect after 3 seconds
+        eventSourceInstance.close();
+        setTimeout(() => connectSSE(targetElement), 3000);
       };
     }
   </script>

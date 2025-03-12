@@ -1,4 +1,3 @@
-use std::any::Any;
 
 use diesel::prelude::*;
 use diesel::{
