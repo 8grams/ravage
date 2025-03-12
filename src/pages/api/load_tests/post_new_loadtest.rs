@@ -12,6 +12,7 @@ use crate::services::get_collection::get_single_collection;
 use crate::services::get_request::get_single_request;
 use crate::services::gooses::{LoadTestConfig, goose_loadtest};
 use crate::services::loadtest_services::insert_loadtest;
+use crate::utils::monitor_logs::get_or_create_channel;
 
 #[derive(Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct JsonData {
@@ -50,7 +51,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
 
     create_dir_all(data_dir.clone()).await.unwrap();
 
-    let _ = insert_loadtest(
+    let lt = insert_loadtest(
         &mut state.pool.get().unwrap(),
         NewLoadTest {
             name: json_data.name,
@@ -60,7 +61,9 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             report_path: format!("/data/{}", report_file_name),
         },
     )
-    .await;
+    .await
+    .unwrap();
+    let sender = get_or_create_channel(&state, lt.id).await;
     let timeout = json_data.timeout.unwrap_or("100".into());
     let starts_per_second: usize = json_data
         .starts_per_second
@@ -83,7 +86,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         coll,
         request,
         LoadTestConfig {
-            load_test_id: 0,
+            load_test_id: lt.id,
             starts_per_second,
             timeout,
             runtime,
@@ -92,8 +95,10 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             log_path: format!("{}/{}", data_dir.clone(), log_file_name),
             report_path: format!("{}/{}", data_dir, report_file_name),
         },
+        sender,
     )
     .await;
 
-    HttpResponse::Ok().body("Ok")
+    let response = format!(r"<pre id='log' data-id='{}'></pre>", lt.id);
+    HttpResponse::Ok().body(response)
 }

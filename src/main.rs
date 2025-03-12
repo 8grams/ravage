@@ -5,8 +5,9 @@ use actix_session::{SessionMiddleware, storage::CookieSessionStore};
 use actix_web::{App, HttpServer, cookie::Key, middleware::Logger, web};
 use app_state::AppState;
 use dotenvy::dotenv;
+use futures::lock::Mutex;
 use pages::index;
-use std::env;
+use std::{collections::HashMap, env, sync::Arc};
 
 mod app_state;
 pub mod conn;
@@ -26,6 +27,7 @@ pub async fn main() -> std::io::Result<()> {
     let tera_tmpl = embed::load_templates().unwrap();
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
+    let log_channels = Arc::new(Mutex::new(HashMap::new()));
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
@@ -47,6 +49,7 @@ pub async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(AppState {
                 tera: tera_tmpl.clone(),
                 pool: pool.clone(),
+                log_channels: log_channels.clone(),
             }))
             .route(
                 "/static/{filename:.*}",
