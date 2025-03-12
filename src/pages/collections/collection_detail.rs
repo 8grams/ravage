@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::{
     app_state::AppState,
     services::{
-        get_collection::{get_main_collections, get_single_collection},
+        get_collection::{get_collection_headers, get_main_collections, get_single_collection},
         get_request::{get_collection_requests, get_request_headers},
     },
 };
@@ -28,6 +28,8 @@ pub async fn collection_detail(
         ctx.insert("headers", &headers);
     }
     let collection_id = id.into_inner();
+    let default_headers = get_collection_headers(conn, collection_id).await.unwrap();
+    ctx.insert("default_headers", &default_headers);
 
     let collections = get_main_collections(conn).await.unwrap();
     ctx.insert("collections", &collections);
