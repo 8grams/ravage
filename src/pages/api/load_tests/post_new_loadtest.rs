@@ -41,7 +41,9 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         request = Some(req);
     };
 
-    let data_dir = env::var("DATA_DIR").unwrap_or("./data".into()).to_string();
+    let data_dir = env::var("DATA_DIR")
+        .unwrap_or("/opt/data".into())
+        .to_string();
     let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
     let report_file_name = format!("report_{}.html", timestamp);
     let log_file_name = format!("log_{}.txt", timestamp);
