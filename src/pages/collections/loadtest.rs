@@ -23,6 +23,9 @@ pub async fn new_load_test(
     let mut ctx = tera::Context::new();
     let collection_id = id.into_inner();
     let query_params = params.into_inner();
+    if let Some(request_id) = query_params.request {
+        ctx.insert("REQUEST_ID", &request_id);
+    }
 
     let collections = get_main_collections(conn).await.unwrap();
     ctx.insert("collections", &collections);
@@ -33,13 +36,6 @@ pub async fn new_load_test(
 
         let requests = get_collection_requests(conn, collection_id).await.unwrap();
         ctx.insert("requests", &requests);
-
-        let request_id = query_params.request.unwrap_or(if !requests.is_empty() {
-            requests[0].id
-        } else {
-            0
-        });
-        ctx.insert("REQUEST_ID", &request_id);
 
         let rendered = state
             .tera
