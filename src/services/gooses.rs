@@ -1,6 +1,7 @@
 use crate::models::{collection::Collection, request::Request};
 use goose::prelude::*;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
+use tokio::sync::RwLock;
 use tokio::sync::broadcast::Sender;
 use tokio::task::spawn;
 
@@ -16,7 +17,7 @@ pub struct LoadTestConfig {
 }
 
 // Global static OnceLock to store the request safely
-static REQUEST_DATA: OnceLock<Request> = OnceLock::new();
+static REQUEST_DATA: OnceLock<Arc<RwLock<Option<Request>>>> = OnceLock::new();
 static LOG_SENDER: OnceLock<Sender<String>> = OnceLock::new();
 
 pub async fn goose_loadtest(
@@ -25,8 +26,10 @@ pub async fn goose_loadtest(
     config: LoadTestConfig,
     sender: Sender<String>,
 ) {
+    let request_data = REQUEST_DATA.get_or_init(|| Arc::new(RwLock::new(None)));
     if let Some(req) = request {
-        let _ = REQUEST_DATA.set(req);
+        let mut stored_request = request_data.write().await;
+        *stored_request = Some(req);
     }
     let _ = LOG_SENDER.set(sender);
 
@@ -94,7 +97,8 @@ async fn loadtest_transaction_repeat(user: &mut GooseUser) -> TransactionResult 
 }
 
 async fn perform_request(user: &mut GooseUser) -> TransactionResult {
-    if let Some(request) = REQUEST_DATA.get() {
+    let request_data = REQUEST_DATA.get().expect("FAILED REQUEST DATA");
+    if let Some(request) = request_data.read().await.as_ref() {
         let path = &request.path;
         let method = request.method.to_uppercase();
         let body_content = request.body_content.clone().unwrap_or_default();

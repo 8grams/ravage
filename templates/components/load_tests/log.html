@@ -1,0 +1,34 @@
+<div>
+  <fieldset class="fieldset">
+    <legend class="fieldset-legend">Log</legend>
+    <div class="mockup-code w-full">
+      <div class="max-h-96 overflow-y-auto">
+        <pre id="log" data-id="0"></pre>
+      </div>
+    </div>
+  </fieldset>
+  <script>
+    function connectSSE(targetElement) {
+      const container = document.querySelector(targetElement);
+      let url = `/api/load_tests/${container.dataset.id}/logs`;
+      const eventSource = new EventSource(url);
+
+      eventSource.addEventListener("message", (event) => {
+        if (event.data) {
+          if (container) {
+            const messageElement = document.createElement("pre");
+            messageElement.innerHTML = event.data + "\n"; // Ensure proper HTML rendering
+            container.appendChild(messageElement); // Append new message
+            container.scrollTop = container.scrollHeight; // Scroll to bottom
+          }
+        }
+      });
+
+      eventSource.onerror = () => {
+        console.error("SSE connection lost. Retrying...");
+        eventSource.close();
+        setTimeout(() => connectSSE(url, targetElement), 3000); // Reconnect after 3 seconds
+      };
+    }
+  </script>
+</div>
