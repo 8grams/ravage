@@ -2,13 +2,12 @@ use crate::models::{collection::Collection, request::Request};
 use goose::prelude::*;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::{Arc, OnceLock};
 use tokio::sync::RwLock;
 use tokio::sync::broadcast::Sender;
 use tokio::task::spawn;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LoadTestConfig {
     pub follow: bool,
     pub load_test_id: i32,
@@ -78,14 +77,6 @@ async fn run_goose_loadtest(
     goose = goose.set_default(GooseDefault::StickyFollow, config.follow)?;
 
     let log_sender = LOG_SENDER.get().expect("FAILED LOG SENDER");
-    let sender = log_sender.read().await.clone();
-
-    if let Some(sender) = sender {
-        let _ = sender.send(format!(
-            "🚀 Loadtest starting with {} users",
-            config.total_users
-        ));
-    }
 
     let result = goose.execute().await;
 
@@ -119,40 +110,31 @@ async fn loadtest_transaction_repeat(user: &mut GooseUser) -> TransactionResult 
 async fn perform_request(user: &mut GooseUser) -> TransactionResult {
     let request_data = REQUEST_DATA.get().expect("FAILED REQUEST DATA");
     let log_sender = LOG_SENDER.get().expect("FAILED LOG SENDER");
-    let headers_data = HEADERS_DATA.get().expect("FAILED HEADERS DATA");
+    let header_data = HEADERS_DATA.get().expect("FAILED HEADERS DATA");
 
     let mut header_map = HeaderMap::new();
-    if let Some(headers) = headers_data.read().await.clone() {
-        for (key, value) in headers.iter() {
+
+    if let Some(headers) = header_data.read().await.clone() {
+        for (key, value) in headers {
             if let (Ok(header_name), Ok(header_value)) = (
                 HeaderName::from_bytes(key.as_bytes()),
-                HeaderValue::from_str(value),
+                HeaderValue::from_str(&value),
             ) {
                 header_map.insert(header_name, header_value);
             }
         }
     }
-    let client_builder = reqwest::Client::builder().default_headers(header_map);
-    let _ = user.set_client_builder(client_builder).await;
+
+    let builder = reqwest::Client::builder().default_headers(header_map);
+    let _ = user.set_client_builder(builder).await;
 
     if let Some(request) = request_data.read().await.as_ref() {
         let path = &request.path;
         let method = request.method.to_uppercase();
         let body_content = request.body_content.clone().unwrap_or_default();
-        let headers = headers_data.read().await.clone().unwrap_or_default(); // Get headers
+        let body_type = request.body_type.clone().unwrap_or_default();
 
         let sender = log_sender.read().await.clone();
-
-        // Convert headers into reqwest's HeaderMap
-        let mut header_map = HeaderMap::new();
-        for (key, value) in headers.iter() {
-            if let (Ok(header_name), Ok(header_value)) = (
-                HeaderName::from_bytes(key.as_bytes()),
-                HeaderValue::from_str(value),
-            ) {
-                header_map.insert(header_name, header_value);
-            }
-        }
 
         if user.weighted_users_index % 5 == 0 {
             if let Some(sender) = sender.as_ref() {
@@ -163,27 +145,24 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
             }
         }
 
-        // Use user.client to make the request with headers
-        let response = match method.as_str() {
-            "POST" => {
-                user.client
-                    .post(&format!("{}{}", user.base_url, path))
-                    .headers(header_map)
-                    .body(body_content)
-                    .send()
+        let result = match method.as_str() {
+            "POST" => match body_type.as_str() {
+                "application/json" => {
+                    println!("{}", body_content);
+                    user.post_json(
+                        path,
+                        &serde_json::from_str::<serde_json::Value>(&body_content)
+                            .unwrap_or_default(),
+                    )
                     .await
-            }
-            _ => {
-                user.client
-                    .get(&format!("{}{}", user.base_url, path))
-                    .headers(header_map)
-                    .send()
-                    .await
-            }
+                }
+                _ => user.post(path, body_content).await,
+            },
+            _ => user.get(path).await,
         };
 
         if let Some(sender) = sender.as_ref() {
-            match response {
+            match result {
                 Ok(_) if user.weighted_users_index % 5 == 0 => {
                     let _ = sender.send(format!("✅ User {}: Success", user.weighted_users_index));
                 }
@@ -197,11 +176,7 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
             }
         }
     } else {
-        let response = user
-            .client
-            .get(format!("{}{}", user.base_url, "/"))
-            .send()
-            .await;
+        let result = user.get("/").await;
         let sender = log_sender.read().await.clone();
 
         if user.weighted_users_index < 3 {
@@ -213,7 +188,7 @@ async fn perform_request(user: &mut GooseUser) -> TransactionResult {
             }
         }
 
-        if let Err(e) = response {
+        if let Err(e) = result {
             if let Some(sender) = sender.as_ref() {
                 let _ = sender.send(format!(
                     "❌ User {}: Error - {}",
