@@ -39,16 +39,22 @@ CMD ["/app/target/release/ravage"]
 
 # final outcome
 FROM debian:12.9-slim
-RUN apt update && apt install -y nginx supervisor
+RUN apt update && apt install -y nginx supervisor curl xz-utils
 WORKDIR /app
 
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/diesel-rs/diesel/releases/latest/download/diesel_cli-installer.sh | sh
+
 COPY --from=builder /app/target/release/ravage ./
+COPY ./migrations ./migrations
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 COPY ./docker/default.conf /etc/nginx/conf.d/default.conf
+COPY ./start.sh ./start.sh
 
 RUN mkdir -p /var/log/supervisor \
+    && mkdir -p /opt/data \
     && mkdir -p /var/run/supervisor \
     && chmod -R 777 /var/run/supervisor \
-    && chmod -R 777 /var/log/supervisor
+    && chmod -R 777 /var/log/supervisor \
+    && chmod +x ./start.sh
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT [ "bash", "./start.sh" ]

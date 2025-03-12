@@ -13,8 +13,8 @@ pub async fn login_authentication(
     form_data: web::Form<LoginForm>,
     session: actix_session::Session,
 ) -> impl Responder {
-    let username = env::var("USERNAME").unwrap_or("admin".to_string());
-    let password = env::var("PASSWORD").unwrap_or("admin".to_string());
+    let username = env::var("ADMIN_USERNAME").unwrap_or("admin".to_string());
+    let password = env::var("ADMIN_PASSWORD").unwrap_or("ravage".to_string());
     let form_data = form_data.into_inner();
     if (form_data.username == username) && (form_data.password == password) {
         let _ = session.insert("session", json!({ "username": username }));

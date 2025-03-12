@@ -42,7 +42,7 @@ make init
 Install Diesel
 
 ```
-make diesel-instal
+make diesel-install
 ```
 
 Run migration
