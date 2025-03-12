@@ -75,11 +75,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     .unwrap();
     let sender = get_or_create_channel(&state, lt.id).await;
     let timeout = json_data.timeout.unwrap_or("100".into());
-    let starts_per_second: usize = json_data
-        .starts_per_second
-        .unwrap_or("50".into())
-        .parse::<usize>()
-        .unwrap();
+    let starts_per_second = json_data.starts_per_second.unwrap_or("50".into());
     let launch_all_users: usize = json_data
         .launch_all_users
         .unwrap_or("30".into())
