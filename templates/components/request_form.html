@@ -25,7 +25,7 @@
     </div>
     <div class="mt-8 space-y-4">
       <fieldset class="fieldset">
-        <legend class="fieldset-legend">Request Name</legend>
+        <legend class="fieldset-legend text-base">Request Name</legend>
         <input
           type="text"
           class="input w-full"
@@ -36,7 +36,7 @@
         />
       </fieldset>
       <fieldset class="fieldset">
-        <legend class="fieldset-legend">Path</legend>
+        <legend class="fieldset-legend text-base">Path</legend>
         <div class="flex gap-2">
           <input
             name="path"
@@ -59,11 +59,11 @@
         </div>
       </fieldset>
       <fieldset class="fieldset">
-        <legend class="fieldset-legend">Headers</legend>
+        <legend class="fieldset-legend text-base">Headers</legend>
         {% include "components/form_header.html" %}
       </fieldset>
       <fieldset class="fieldset">
-        <legend class="fieldset-legend">Body</legend>
+        <legend class="fieldset-legend text-base">Body</legend>
         <div class="flex gap-4">
           <label>
             <!-- prettier-ignore -->
@@ -112,7 +112,7 @@
     </div>
   </form>
   {% if request %}
-  <legend class="fieldset-legend">Response</legend>
+  <legend class="fieldset-legend text-base">Response</legend>
   <textarea
     id="log"
     readonly
