@@ -1,7 +1,7 @@
 use crate::{
     app_state::AppState,
-    models::{collection::Collection, request::Request},
-    schema::{collections, requests},
+    models::request::Request,
+    schema::requests,
 };
 use actix_web::{HttpResponse, Responder, web};
 use diesel::prelude::*;

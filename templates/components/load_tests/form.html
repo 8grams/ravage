@@ -1,19 +1,6 @@
-<form
-  hx-post="/api/load_tests{% if load_test%}/{{load_test.id}}{%endif%}?refresh={%if load_test%}true{%else%}false{%endif%}"
-  hx-ext="json-enc"
-  hx-target="#log"
-  hx-swap="outerHTML"
-  hx-on::after-swap="connectSSE('#log')"
->
-  <div class="text-end">
-    <input type="hidden" name="collection_id" value="{{COLLECTION_ID}}" />
-    {% if REQUEST_ID %}
-    <input type="hidden" name="request_id" value="{{REQUEST_ID}}" />
-    {% endif %}
-    <button class="btn btn-success">Run</button>
-  </div>
+<div>
   <fieldset class="fieldset">
-    <legend class="fieldset-legend">Name</legend>
+    <legend class="fieldset-legend text-base">Name</legend>
     <input
       type="text"
       class="input w-full"
@@ -22,10 +9,10 @@
       required
     />
   </fieldset>
-  <div class="mt-8 font-semibold">Configuration</div>
+  <div class="mt-8 font-semibold text-lg">Configuration</div>
   <div class="mt-4 space-y-4">
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">Timeout</legend>
+      <legend class="fieldset-legend text-base">Timeout</legend>
       <input
         type="text"
         class="input w-full"
@@ -37,8 +24,8 @@
       />
     </fieldset>
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">Users</legend>
-      <div class="flex gap-2">
+      <legend class="fieldset-legend text-base">Users</legend>
+      <div class="flex gap-2 mt-4">
         <label class="floating-label">
           <span>Starts per second</span>
           <input
@@ -66,7 +53,7 @@
       </div>
     </fieldset>
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">Run time</legend>
+      <legend class="fieldset-legend text-base">Run time</legend>
       <input
         type="number"
         class="input w-full"
@@ -78,38 +65,4 @@
       />
     </fieldset>
   </div>
-  <div class="mt-8">
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Log</legend>
-      <div class="mockup-code w-full">
-        <div class="max-h-96 overflow-y-auto">
-          <pre id="log" data-id="0"></pre>
-        </div>
-      </div>
-    </fieldset>
-  </div>
-</form>
-<script>
-  function connectSSE(targetElement) {
-    const container = document.querySelector(targetElement);
-    let url = `/api/load_tests/${container.dataset.id}/logs`;
-    const eventSource = new EventSource(url);
-
-    eventSource.addEventListener("message", (event) => {
-      if (event.data) {
-        if (container) {
-          const messageElement = document.createElement("pre");
-          messageElement.innerHTML = event.data + "\n"; // Ensure proper HTML rendering
-          container.appendChild(messageElement); // Append new message
-          container.scrollTop = container.scrollHeight; // Scroll to bottom
-        }
-      }
-    });
-
-    eventSource.onerror = () => {
-      console.error("SSE connection lost. Retrying...");
-      eventSource.close();
-      setTimeout(() => connectSSE(url, targetElement), 3000); // Reconnect after 3 seconds
-    };
-  }
-</script>
+</div>

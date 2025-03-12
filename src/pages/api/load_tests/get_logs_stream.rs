@@ -1,7 +1,6 @@
 use actix_web::{HttpResponse, Responder, web};
 use futures::{StreamExt, stream};
-use std::{convert::Infallible, time::Duration};
-use tokio::time::sleep;
+use std::convert::Infallible;
 use tokio_stream::wrappers::BroadcastStream;
 
 use crate::{app_state::AppState, utils::monitor_logs::get_or_create_channel};
