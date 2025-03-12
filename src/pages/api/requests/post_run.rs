@@ -1,8 +1,5 @@
 use actix_web::{HttpResponse, Responder, web};
-use chrono::Utc;
 use std::collections::HashMap;
-use std::fs::{File, create_dir_all};
-use std::io::Write;
 
 use crate::app_state::AppState;
 use crate::services::get_collection::{get_collection_headers, get_single_collection};
@@ -33,15 +30,6 @@ pub async fn run(state: web::Data<AppState>, id: web::Path<i32>) -> impl Respond
 
     let text = String::from_utf8(bytes.clone().to_vec()).unwrap();
     let escaped = html_escape::encode_text(&text.clone()).into_owned();
-
-    let log_dir = "./static/log";
-    create_dir_all(log_dir).unwrap();
-
-    let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
-    let file_name = format!("log_{}.txt", timestamp);
-    let log_path = format!("{}/{}", log_dir, file_name);
-    let mut file = File::create(&log_path).unwrap();
-    file.write_all(&bytes.clone()).unwrap();
 
     HttpResponse::Ok().body(escaped)
 }
