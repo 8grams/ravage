@@ -36,6 +36,9 @@
             container.parentElement.scrollHeight;
         }
       });
+      while (container.children.length > 500) {
+        container.removeChild(container.firstChild);
+      }
 
       eventSourceInstance.onerror = () => {
         console.error("SSE connection lost. Retrying...");
