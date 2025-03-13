@@ -1,0 +1,47 @@
+<fieldset class="fieldset">
+  <legend class="fieldset-legend text-base">Body</legend>
+  <div class="flex gap-4">
+    <label>
+      <!-- prettier-ignore -->
+      <input
+        type="radio"
+        name="body_type"
+        class="radio radio-sm radio-neutral"
+        {%if BODY_TYPE == 'application/json' or not request %}checked{%endif%}
+        value="application/json"
+      />
+      <span>json</span>
+    </label>
+    <label>
+      <!-- prettier-ignore -->
+      <input
+        type="radio"
+        name="body_type"
+        class="radio radio-sm radio-neutral"
+        value="multipart/form-data"
+        {%if BODY_TYPE == 'multipart/form-data' %}checked{%endif%}
+      />
+      <span>multipart/form-data</span>
+    </label>
+    <label>
+      <!-- prettier-ignore -->
+      <input
+        type="radio"
+        class="radio radio-sm radio-neutral"
+        name="body_type"
+        {%if BODY_TYPE == 'application/x-www-form-urlencoded' %}checked{%endif%}
+        value="application/x-www-form-urlencoded"
+      />
+      <span>x-www-form-urlencoded</span>
+    </label>
+  </div>
+  <div class="mt-4">
+    <!-- prettier-ignore -->
+    <textarea
+      class="textarea w-full"
+      rows="5"
+      placeholder="..."
+      name="body_content"
+    >{{BODY_CONTENT | default(value='')}}</textarea>
+  </div>
+</fieldset>
