@@ -11,7 +11,6 @@ use crate::{
 #[derive(Clone)]
 pub struct LoadConfig {
     pub follow: bool,
-    pub load_test_id: i32,
     pub launch_all_users: usize,
     pub total_users: usize,
     pub timeout: String,
@@ -29,7 +28,7 @@ pub struct GooseLoadConfig {
     pub headers: Option<Vec<Header>>,
 }
 
-pub async fn goose_closuer_load_test(config: GooseLoadConfig) {
+pub async fn goose_closure_load_test(config: GooseLoadConfig) {
     tokio::spawn(async move {
         if let Err(e) = run_loadtest(config.clone()).await {
             let sender = config.sender;

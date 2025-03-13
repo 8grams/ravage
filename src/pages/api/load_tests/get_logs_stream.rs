@@ -12,14 +12,12 @@ pub async fn logs_stream(state: web::Data<AppState>, path: web::Path<i32>) -> im
         .subscribe();
 
     let initial_msg = stream::once(async move {
-        Ok::<_, Infallible>(web::Bytes::from(
-            "event: message\ndata: Initializing log...\n\n",
-        ))
+        Ok::<_, Infallible>(web::Bytes::from("data: Initializing log...\n\n"))
     });
 
     let stream = BroadcastStream::new(channel).map(|msg| {
         Ok::<web::Bytes, Infallible>(match msg {
-            Ok(msg) => web::Bytes::from(format!("event: message\ndata: {}\n\n", msg).to_string()),
+            Ok(msg) => web::Bytes::from(format!("{}\n\n", msg).to_string()),
             Err(_) => web::Bytes::from("data: Unknown error\n\n".to_string()),
         })
     });

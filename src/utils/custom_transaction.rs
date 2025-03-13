@@ -49,12 +49,10 @@ async fn perform_request(
         let _ = user
             .set_client_builder(builder.default_headers(header_map))
             .await;
-        if user.weighted_users_index % 5 == 0 {
-            let _ = sender.send(format!(
-                "🔄 User {}: {} {}",
-                user.weighted_users_index, req.method, req.path
-            ));
-        }
+        let _ = sender.send(format!(
+            "data: 🔄 User {}: {} {}",
+            user.weighted_users_index, req.method, req.path
+        ));
         let result: Result<GooseResponse, _> = match req.method.to_uppercase().as_str() {
             "POST" => {
                 if let Some(body_type) = req.body_type {
@@ -88,39 +86,27 @@ async fn perform_request(
         };
         match result {
             Ok(r) => {
-                if user.weighted_users_index % 5 == 0 {
-                    let _ =
-                        sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
-                }
+                let _ = sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
             }
             Err(e) => {
-                if user.weighted_users_index % 5 == 0 {
-                    let _ = sender.send(format!("data: ❌ Failed, message: {}", e));
-                }
+                let _ = sender.send(format!("data: ❌ Failed, message: {}", e));
             }
         }
     } else {
         let _ = user
             .set_client_builder(builder.default_headers(header_map))
             .await;
-        if user.weighted_users_index % 5 == 0 {
-            let _ = sender.send(format!(
-                "🔄 User {}: GET {}",
-                user.weighted_users_index, user.base_url
-            ));
-        }
+        let _ = sender.send(format!(
+            "data: 🔄 User {}: GET {}",
+            user.weighted_users_index, user.base_url
+        ));
         let result = user.get("").await;
         match result {
             Ok(r) => {
-                if user.weighted_users_index % 5 == 0 {
-                    let _ =
-                        sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
-                }
+                let _ = sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
             }
             Err(e) => {
-                if user.weighted_users_index % 5 == 0 {
-                    let _ = sender.send(format!("data: ❌ Error, message: {}", e));
-                }
+                let _ = sender.send(format!("data: ❌ Error, message: {}", e));
             }
         }
     }
