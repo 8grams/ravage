@@ -2,7 +2,9 @@ use goose::prelude::*;
 use std::{sync::Arc, time::Duration};
 
 use crate::{
-    models::{collection::Collection, header::Header, request::Request},
+    models::{
+        collection::Collection, header::Header, request::Request, request_header::RequestHeader,
+    },
     utils::custom_transaction::loadtest_transaction_wrapper,
 };
 
@@ -23,7 +25,7 @@ pub struct GooseLoadConfig {
     pub load_config: LoadConfig,
     pub sender: tokio::sync::broadcast::Sender<String>,
     pub collection: Collection,
-    pub requests: Option<Vec<Request>>,
+    pub requests: Option<Vec<(Request, Vec<RequestHeader>)>>,
     pub headers: Option<Vec<Header>>,
 }
 
@@ -41,11 +43,13 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
     let mut scenario = scenario!("WebsiteUser")
         // After each transaction runs, sleep randomly from 5 to 15 seconds.
         .set_wait_time(Duration::from_secs(5), Duration::from_secs(15))?;
+
+    // if request
     if let Some(requests) = config.requests.clone() {
-        for request in requests {
+        for req_n_h in requests {
             let config = config_clone.clone();
             let trans = Transaction::new(Arc::new(move |user| {
-                loadtest_transaction_wrapper(user, config.clone(), Some(request.clone()))
+                loadtest_transaction_wrapper(user, config.clone(), Some(req_n_h.clone()))
             }));
             let new_scenario = scenario.clone().register_transaction(trans);
             scenario = new_scenario;

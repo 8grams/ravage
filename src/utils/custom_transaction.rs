@@ -2,12 +2,15 @@ use goose::{goose::GooseResponse, prelude::*};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::pin::Pin;
 
-use crate::{models::request::Request, services::goose_closure::GooseLoadConfig};
+use crate::{
+    models::{request::Request, request_header::RequestHeader},
+    services::goose_closure::GooseLoadConfig,
+};
 
 pub fn loadtest_transaction_wrapper(
     user: &mut GooseUser,
     config: GooseLoadConfig,
-    request: Option<Request>,
+    request: Option<(Request, Vec<RequestHeader>)>,
 ) -> Pin<Box<dyn Future<Output = TransactionResult> + Send + '_>> {
     Box::pin(perform_request(user, config, request))
 }
@@ -15,10 +18,12 @@ pub fn loadtest_transaction_wrapper(
 async fn perform_request(
     user: &mut GooseUser,
     config: GooseLoadConfig,
-    request: Option<Request>,
+    request: Option<(Request, Vec<RequestHeader>)>,
 ) -> TransactionResult {
     let sender = config.sender.clone();
-    let mut header_map = HeaderMap::new();
+
+    let mut header_map: HeaderMap = HeaderMap::new();
+
     if let Some(headers) = config.headers {
         for h in headers {
             if let (Ok(header_name), Ok(header_value)) = (
@@ -30,10 +35,20 @@ async fn perform_request(
         }
     }
 
-    let builder = reqwest::Client::builder().default_headers(header_map);
-    let _ = user.set_client_builder(builder).await;
+    let builder = reqwest::Client::builder();
 
-    if let Some(req) = request {
+    if let Some((req, headers)) = request {
+        for h in headers {
+            if let (Ok(header_name), Ok(header_value)) = (
+                HeaderName::from_bytes(h.key.as_bytes()),
+                HeaderValue::from_str(&h.value),
+            ) {
+                header_map.insert(header_name, header_value);
+            }
+        }
+        let _ = user
+            .set_client_builder(builder.default_headers(header_map))
+            .await;
         if user.weighted_users_index % 5 == 0 {
             let _ = sender.send(format!(
                 "🔄 User {}: {} {}",
@@ -85,6 +100,9 @@ async fn perform_request(
             }
         }
     } else {
+        let _ = user
+            .set_client_builder(builder.default_headers(header_map))
+            .await;
         if user.weighted_users_index % 5 == 0 {
             let _ = sender.send(format!(
                 "🔄 User {}: GET {}",
