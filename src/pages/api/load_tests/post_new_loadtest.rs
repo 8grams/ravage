@@ -135,6 +135,9 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     )
     .await;
 
-    let response = format!(r"<pre id='log' data-id='{}'></pre>", lt.id);
+    let response = format!(
+        r"<pre id='log' data-id='{}'><code>Load test running!!</code></pre>",
+        lt.id
+    );
     HttpResponse::Ok().body(response)
 }
