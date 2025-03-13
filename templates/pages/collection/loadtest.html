@@ -15,27 +15,60 @@
     >
       <div class="border rounded-lg border-base-300 p-6">
         <section class="col-span-1 lg:col-span-8 xl:col-span-9 space-y-6">
-          {% include "components/load_tests/form.html" %}
-          <div class="tabs tabs-box">
-            <!-- prettier-ignore -->
-            {% for request in requests %}
-            <a
-              href="/collections/{{request.collection_id}}/loadtest?request={{request.id}}"
-              role="tab"
-              class="tab {%if REQUEST_ID and request.id == REQUEST_ID %}tab-active{%endif%}"
-              >{{request.name}}</a
-            >
-            {%if REQUEST_ID and request.id == REQUEST_ID %}
-            <div class="tab-content bg-base-100 border-base-300 p-6">
-              {%include "components/load_tests/request_form.html" %}
-            </div>
-            {%endif%}
-            <!-- separator -->
-            {% endfor %}
-          </div>
-          {% include "components/load_tests/log.html" %}
+          {% include "components/load_tests/form.html" %} {% if HIDE %}
+          <!-- separator -->
+          {% if REQUEST_ID %}
+          <!-- separator -->
+          {% set request = requests | filter(attribute='id', value=REQUEST_ID) |
+          first %}
+          <!-- separator -->
+          {%include "components/load_tests/request_form.html" %}
+          <!-- separator -->
+          {%endif%}
+          <!-- separator -->
+          {%elif requests %}
 
-          <div class="text-end">
+          <div>
+            <label class="text-lg font-semibold">Select Request</label>
+            <div class="tabs tabs-box mt-4">
+              <!-- prettier-ignore -->
+              {% for request in requests %}
+              <a
+                href="/collections/{{request.collection_id}}/loadtest?request={{request.id}}"
+                role="tab"
+                class="tab {%if REQUEST_ID and request.id == REQUEST_ID %}tab-active{%endif%}"
+                >{{request.name}}</a
+              >
+              {%if REQUEST_ID and request.id == REQUEST_ID %}
+              <div class="tab-content bg-base-100 border-base-300 p-6">
+                {%include "components/load_tests/request_form.html" %}
+              </div>
+              {%endif%}
+              <!-- separator -->
+              {% endfor %}
+            </div>
+          </div>
+          {%endif%}
+          <!-- separator -->
+          {% if not REQUEST_ID or not requests %}
+          <div>
+            <div role="alert" class="alert">
+              <span class="material-symbols-rounded" style="font-size: 20px"
+                >info</span
+              >
+              <span
+                >If you not select request, loadtest will run on
+                {{collection.host}} and GET method.</span
+              >
+            </div>
+          </div>
+          <div>
+            <div class="text-lg font-semibold mb-4">Headers</div>
+            {% include "components/form_header.html" %}
+          </div>
+          {%endif%}
+
+          <div>
             <input
               type="hidden"
               name="collection_id"
@@ -46,6 +79,7 @@
             {% endif %}
             <button class="btn btn-success">Run</button>
           </div>
+          {% include "components/load_tests/log.html" %}
         </section>
       </div>
     </form>

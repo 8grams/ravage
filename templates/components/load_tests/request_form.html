@@ -11,4 +11,14 @@
       required
     />
   </fieldset>
+  <fieldset class="fieldset">
+    <legend class="fieldset-legend text-base">Header</legend>
+    {% include "components/form_header.html" %}
+  </fieldset>
+  <!-- separator -->
+  {% set BODY_TYPE = request.body_type | default(value='application/json') %}
+  <!-- separator -->
+  {% set BODY_CONTENT = request.body_content | default(value='') %}
+  <!-- separator -->
+  {% include "components/form_body.html" %}
 </div>

@@ -25,6 +25,9 @@ pub struct JsonData {
     total_users: Option<String>,
     follow: Option<String>,
     runtime: Option<String>,
+    body_type: Option<String>,
+    body_content: Option<String>,
+    headers: Option<String>,
 }
 
 pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>) -> impl Responder {
@@ -50,6 +53,27 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             headers = hdrs.into_iter().map(|h| (h.key, h.value)).collect()
         }
     };
+    if let Some(req) = request.clone() {
+        if let Some(body_type) = json_data.body_type {
+            request = Some(Request {
+                body_type: Some(body_type),
+                ..req.clone()
+            });
+        }
+        if let Some(body_content) = json_data.body_content {
+            request = Some(Request {
+                body_content: Some(body_content),
+                ..req
+            });
+        }
+    }
+
+    if let Some(hdr_string) = json_data.headers {
+        let hdrs: Vec<crate::models::header::Header> = serde_json::from_str(&hdr_string).unwrap();
+        for h in hdrs.into_iter() {
+            headers.insert(h.key, h.value);
+        }
+    }
 
     let data_dir = env::var("DATA_DIR")
         .unwrap_or("/opt/data".into())
@@ -91,6 +115,8 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap();
     let follow: bool = json_data.follow.unwrap_or("on".into()) == "on";
 
+    println!("{:?}", headers);
+    println!("{:?}", request);
     let _ = goose_loadtest(
         coll,
         request,
