@@ -1,7 +1,7 @@
 <div
   class="space-y-4"
   x-data="{
-  headers: {%if headers %}[{% for header in headers %}{'key':'{{header.key}}','value':'{{header.value}}'}{%endfor%}]{%else%}[]{%endif%},
+    headers: {%if headers %}[{% for header in headers %}{'key':'{{header.key}}','value':'{{header.value}}'},{%endfor%}]{%else%}[]{%endif%},
     addHeader() {
       this.headers.push({ key: '', value: '' });
     },
