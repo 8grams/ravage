@@ -26,7 +26,8 @@
           <!-- separator -->
           {%endif%}
           <!-- separator -->
-          {%else%}
+          {%elif requests %}
+
           <div>
             <label class="text-lg font-semibold">Select Request</label>
             <div class="tabs tabs-box mt-4">
@@ -46,6 +47,24 @@
               <!-- separator -->
               {% endfor %}
             </div>
+          </div>
+          {%endif%}
+          <!-- separator -->
+          {% if not REQUEST_ID or not requests %}
+          <div>
+            <div role="alert" class="alert">
+              <span class="material-symbols-rounded" style="font-size: 20px"
+                >info</span
+              >
+              <span
+                >If you not select request, loadtest will run on
+                {{collection.host}} and GET method.</span
+              >
+            </div>
+          </div>
+          <div>
+            <div class="text-lg font-semibold mb-4">Headers</div>
+            {% include "components/form_header.html" %}
           </div>
           {%endif%}
 
