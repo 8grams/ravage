@@ -31,7 +31,9 @@ pub struct GooseLoadConfig {
 
 pub async fn goose_closuer_load_test(config: GooseLoadConfig) {
     tokio::spawn(async move {
-        if let Err(e) = run_loadtest(config).await {
+        if let Err(e) = run_loadtest(config.clone()).await {
+            let sender = config.sender;
+            let _ = sender.send(format!("data: Goose load test failed: {}", e));
             eprintln!("Goose load test failed: {}", e);
         }
     });
