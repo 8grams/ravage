@@ -49,10 +49,12 @@ pub async fn new_load_test(
     }
     if let Ok(hdrs) = get_collection_headers(conn, collection_id).await {
         for h in hdrs.into_iter() {
-            headers.push(Header {
-                key: h.key,
-                value: h.value,
-            });
+            if headers.iter().find(|x| x.key == h.key).is_none() {
+                headers.push(Header {
+                    key: h.key,
+                    value: h.value,
+                });
+            }
         }
     }
     ctx.insert("headers", &headers);
