@@ -15,7 +15,9 @@ pub async fn logs_stream(state: web::Data<AppState>, path: web::Path<i32>) -> im
     let logs_buffer = web::Data::new(Mutex::new(VecDeque::with_capacity(500)));
 
     let initial_msg = stream::once(async move {
-        Ok::<_, Infallible>(web::Bytes::from("data: Initializing log...\n\n"))
+        Ok::<_, Infallible>(web::Bytes::from(
+            "data: <pre><code>Initializing log...</code></pre>\n\n",
+        ))
     });
 
     let stream = BroadcastStream::new(channel).map(move |msg| {
@@ -33,7 +35,9 @@ pub async fn logs_stream(state: web::Data<AppState>, path: web::Path<i32>) -> im
 
                 Ok::<web::Bytes, Infallible>(web::Bytes::from(format!("{}\n\n", msg)))
             }
-            Err(_) => Ok(web::Bytes::from("data: Unknown error\n\n")),
+            Err(_) => Ok(web::Bytes::from(
+                "data: <pre><code>Unknown error</code></pre>\n\n",
+            )),
         }
     });
 

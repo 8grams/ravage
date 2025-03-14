@@ -32,6 +32,7 @@ pub struct JsonData {
 }
 
 pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>) -> impl Responder {
+    let mut ctx = tera::Context::new();
     let conn = &mut state.pool.get().unwrap();
     let json_data = data.into_inner();
     let mut headers: Vec<Header> = Vec::new();
@@ -116,6 +117,8 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     )
     .await
     .unwrap();
+
+    ctx.insert("LOADTEST_ID", &lt.id);
     let sender = get_or_create_channel(&state, lt.id).await;
     let timeout = json_data.timeout.unwrap_or("100".into());
     let launch_all_users: usize = json_data
@@ -152,9 +155,9 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     };
     let _ = goose_closure_load_test(config).await;
 
-    let response = format!(
-        r"<pre id='log' data-id='{}'><code>Load test running!!</code></pre>",
-        lt.id
-    );
-    HttpResponse::Ok().body(response)
+    let rendered = state
+        .tera
+        .render("components/load_tests/log_modal.html", &ctx)
+        .unwrap();
+    HttpResponse::Ok().body(rendered)
 }

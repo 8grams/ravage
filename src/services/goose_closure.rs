@@ -81,6 +81,22 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         .set_default(GooseDefault::RunTime, config.load_config.runtime)?
         .set_default(GooseDefault::StickyFollow, config.load_config.follow)?;
 
-    let _ = goose.execute().await?;
+    let result = goose.execute().await;
+
+    let sender = config.sender;
+    match result {
+        Ok(metrics) => {
+            let _ = sender.send(format!(
+                "event: ending\ndata: <pre><code>✅ Load test completed in {}s with {} users</code></pre>",
+                metrics.duration, metrics.total_users
+            ));
+        }
+        Err(error) => {
+            let _ = sender.send(format!(
+                "event: ending\ndata: <pre><code>❌ Loadtest failed: {}</code></pre>",
+                error
+            ));
+        }
+    }
     Ok(())
 }

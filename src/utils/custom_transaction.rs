@@ -50,7 +50,7 @@ async fn perform_request(
             .set_client_builder(builder.default_headers(header_map))
             .await;
         let _ = sender.send(format!(
-            "data: 🔄 User {}: {} {}",
+            "data: <pre><code>🔄 User {}: {} {}</code></pre>\n\n",
             user.weighted_users_index, req.method, req.path
         ));
         let result: Result<GooseResponse, _> = match req.method.to_uppercase().as_str() {
@@ -86,10 +86,16 @@ async fn perform_request(
         };
         match result {
             Ok(r) => {
-                let _ = sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
+                let _ = sender.send(format!(
+                    "data: <pre><code>✅ Success {}</code></pre>\n\n",
+                    r.response.unwrap().status()
+                ));
             }
             Err(e) => {
-                let _ = sender.send(format!("data: ❌ Failed, message: {}", e));
+                let _ = sender.send(format!(
+                    "data: <pre><code>❌ Failed, message: {}</code></pre>\n\n",
+                    e
+                ));
             }
         }
     } else {
@@ -97,16 +103,22 @@ async fn perform_request(
             .set_client_builder(builder.default_headers(header_map))
             .await;
         let _ = sender.send(format!(
-            "data: 🔄 User {}: GET {}",
+            "data: <code>🔄 User {}: GET {}</code>\n\n",
             user.weighted_users_index, user.base_url
         ));
         let result = user.get("").await;
         match result {
             Ok(r) => {
-                let _ = sender.send(format!("data: ✅ Success {}", r.response.unwrap().status()));
+                let _ = sender.send(format!(
+                    "data: <pre><code>✅ Success {}<code></pre>\n\n",
+                    r.response.unwrap().status()
+                ));
             }
             Err(e) => {
-                let _ = sender.send(format!("data: ❌ Error, message: {}", e));
+                let _ = sender.send(format!(
+                    "data: <pre><code>❌ Error, message: {}</code></pre>\n\n",
+                    e
+                ));
             }
         }
     }

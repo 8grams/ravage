@@ -1,50 +1,15 @@
 <div>
-  <fieldset class="fieldset">
-    <legend class="fieldset-legend text-base">Log</legend>
-    <div class="mockup-code w-full">
-      <div class="max-h-96 overflow-y-auto">
-        <pre id="log" data-id="0"></pre>
-      </div>
+  <div class="mockup-code w-full">
+    <div
+      class="max-h-96 overflow-y-auto"
+      hx-ext="sse"
+      data-id="{{LOADTEST_ID}}"
+      sse-connect="/api/load_tests/{{LOADTEST_ID}}/logs"
+      sse-swap="message,ending"
+      hx-swap="beforeend"
+      hx-on::after-swap="this.scrollTop = this.scrollHeight"
+    >
+      <pre><code>Loadtest running!! Please wait, it take times.</code></pre>
     </div>
-  </fieldset>
-  <script>
-    let eventSourceInstance = null; // Store the current SSE instance
-
-    function connectSSE(targetElement) {
-      const container = document.querySelector(targetElement);
-
-      if (!container) {
-        console.error("Target element not found.");
-        return;
-      }
-
-      // Close the previous connection if it exists
-      if (eventSourceInstance) {
-        eventSourceInstance.close();
-        eventSourceInstance = null;
-      }
-
-      let url = `/api/load_tests/${container.dataset.id}/logs`;
-      eventSourceInstance = new EventSource(url);
-
-      eventSourceInstance.addEventListener("message", (event) => {
-        if (event.data) {
-          const messageElement = document.createElement("pre");
-          messageElement.innerHTML = event.data + "\n";
-          container.appendChild(messageElement);
-          container.parentElement.scrollTop =
-            container.parentElement.scrollHeight;
-        }
-      });
-      while (container.children.length > 500) {
-        container.removeChild(container.firstChild);
-      }
-
-      eventSourceInstance.onerror = () => {
-        console.error("SSE connection lost. Retrying...");
-        eventSourceInstance.close();
-        setTimeout(() => connectSSE(targetElement), 3000);
-      };
-    }
-  </script>
+  </div>
 </div>
