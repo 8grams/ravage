@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::env;
 
 use actix_web::{HttpResponse, Responder, web};
@@ -7,11 +6,15 @@ use serde::Deserialize;
 use tokio::fs::create_dir_all;
 
 use crate::app_state::AppState;
+use crate::models::header::Header;
 use crate::models::load_test::NewLoadTest;
 use crate::models::request::Request;
+use crate::models::request_header::RequestHeader;
 use crate::services::get_collection::{get_collection_headers, get_single_collection};
-use crate::services::get_request::{get_request_headers, get_single_request};
-use crate::services::gooses::{LoadTestConfig, goose_loadtest};
+use crate::services::get_request::{
+    get_collection_requests, get_request_headers, get_single_request,
+};
+use crate::services::goose_closure::{GooseLoadConfig, LoadConfig, goose_closure_load_test};
 use crate::services::loadtest_services::insert_loadtest;
 use crate::utils::monitor_logs::get_or_create_channel;
 
@@ -31,9 +34,10 @@ pub struct JsonData {
 }
 
 pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>) -> impl Responder {
+    let mut ctx = tera::Context::new();
     let conn = &mut state.pool.get().unwrap();
     let json_data = data.into_inner();
-    let mut headers: HashMap<String, String> = HashMap::new();
+    let mut headers: Vec<Header> = Vec::new();
 
     let collection_id = json_data.collection_id.parse::<i32>().unwrap();
     let coll = get_single_collection(conn, collection_id).await.unwrap();
@@ -44,35 +48,61 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap();
 
     if let Ok(hdrs) = get_collection_headers(conn, collection_id).await {
-        headers = hdrs.into_iter().map(|h| (h.key, h.value)).collect();
+        headers = hdrs
+            .into_iter()
+            .map(|h| Header {
+                key: h.key,
+                value: h.value,
+            })
+            .collect();
     }
-    let mut request: Option<Request> = None;
-    if let Ok(req) = get_single_request(conn, request_id).await {
-        request = Some(req.clone());
-        if let Ok(hdrs) = get_request_headers(conn, req.id).await {
-            headers = hdrs.into_iter().map(|h| (h.key, h.value)).collect()
+    let mut requests: Vec<(Request, Vec<RequestHeader>)> = Vec::new();
+    if request_id != 0 {
+        if let Ok(req) = get_single_request(conn, request_id).await {
+            let hdrs = get_request_headers(conn, req.id).await.unwrap();
+            requests.push((req.clone(), hdrs));
+        };
+    } else {
+        for req in get_collection_requests(conn, collection_id).await.unwrap() {
+            let hdrs = get_request_headers(conn, req.id).await.unwrap();
+            requests.push((req.clone(), hdrs));
         }
-    };
-    if let Some(req) = request.clone() {
+    }
+    if !requests.is_empty() && request_id != 0 {
+        let mut request = requests.first().unwrap().clone();
         if let Some(body_type) = json_data.body_type {
-            request = Some(Request {
-                body_type: Some(body_type),
-                ..req.clone()
-            });
+            request = (
+                Request {
+                    body_type: Some(body_type),
+                    ..request.clone().0
+                },
+                request.1,
+            );
         }
         if let Some(body_content) = json_data.body_content {
-            request = Some(Request {
-                body_content: Some(body_content),
-                ..req
-            });
+            request = (
+                Request {
+                    body_content: Some(body_content),
+                    ..request.0
+                },
+                request.1,
+            );
         }
+        requests = vec![request];
     }
 
     if let Some(hdr_string) = json_data.headers {
-        let hdrs: Vec<crate::models::header::Header> = serde_json::from_str(&hdr_string).unwrap();
-        for h in hdrs.into_iter() {
-            headers.insert(h.key, h.value);
-        }
+        if let Ok(hdrs) = serde_json::from_str::<Vec<Header>>(&hdr_string) {
+            let keys: Vec<String> = hdrs.iter().map(|h| h.key.clone()).collect();
+            headers = headers
+                .iter()
+                .filter(|h| !keys.contains(&h.key))
+                .cloned()
+                .collect();
+            for h in hdrs {
+                headers.push(h)
+            }
+        };
     }
 
     let data_dir = env::var("DATA_DIR")
@@ -96,6 +126,8 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     )
     .await
     .unwrap();
+
+    ctx.insert("LOADTEST_ID", &lt.id);
     let sender = get_or_create_channel(&state, lt.id).await;
     let timeout = json_data.timeout.unwrap_or("100".into());
     let launch_all_users: usize = json_data
@@ -115,26 +147,26 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
         .unwrap();
     let follow: bool = json_data.follow.unwrap_or("on".into()) == "on";
 
-    println!("{:?}", headers);
-    println!("{:?}", request);
-    let _ = goose_loadtest(
-        coll,
-        request,
-        LoadTestConfig {
-            load_test_id: lt.id,
+    let config = GooseLoadConfig {
+        load_config: LoadConfig {
+            log_path: format!("{}/{}", data_dir.clone(), log_file_name),
+            report_path: format!("{}/{}", data_dir, report_file_name),
             launch_all_users,
             timeout,
             runtime,
             follow,
             total_users,
-            log_path: format!("{}/{}", data_dir.clone(), log_file_name),
-            report_path: format!("{}/{}", data_dir, report_file_name),
-            headers: Some(headers),
         },
         sender,
-    )
-    .await;
+        collection: coll,
+        requests: Some(requests),
+        headers: Some(vec![]),
+    };
+    let _ = goose_closure_load_test(config).await;
 
-    let response = format!(r"<pre id='log' data-id='{}'></pre>", lt.id);
-    HttpResponse::Ok().body(response)
+    let rendered = state
+        .tera
+        .render("components/load_tests/log_modal.html", &ctx)
+        .unwrap();
+    HttpResponse::Ok().body(rendered)
 }

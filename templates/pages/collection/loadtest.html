@@ -22,9 +22,8 @@
         <form
           hx-post="/api/load_tests{% if load_test%}/{{load_test.id}}{%endif%}?refresh={%if load_test%}true{%else%}false{%endif%}"
           hx-ext="json-enc"
-          hx-target="#log"
-          hx-swap="outerHTML"
-          hx-on::after-swap="connectSSE('#log')"
+          hx-target="#modal"
+          hx-swap="innerHTML"
         >
           <section class="col-span-1 lg:col-span-8 xl:col-span-9 space-y-6">
             {% include "components/load_tests/form.html" %} {% if HIDE %}
@@ -41,7 +40,16 @@
             {%elif requests %}
 
             <div>
-              <label class="text-lg font-semibold">Select Request</label>
+              <label class="text-lg font-semibold">Request List</label>
+              <div role="alert" class="alert mt-4">
+                <span class="material-symbols-rounded" style="font-size: 20px"
+                  >info</span
+                >
+                <span
+                  >This collection requests will run load test, on this method
+                  you can't change body_content or content_type</span
+                >
+              </div>
               <div class="tabs tabs-box mt-4">
                 <!-- prettier-ignore -->
                 {% for request in requests %}
@@ -62,14 +70,14 @@
             </div>
             {%endif%}
             <!-- separator -->
-            {% if not REQUEST_ID or not requests %}
+            {% if not REQUEST_ID and not requests %}
             <div>
               <div role="alert" class="alert">
                 <span class="material-symbols-rounded" style="font-size: 20px"
                   >info</span
                 >
                 <span
-                  >If you not select request, loadtest will run on
+                  >If you doesn't have requests loadtest will run on
                   {{collection.host}} and GET method.</span
                 >
               </div>
@@ -86,12 +94,11 @@
                 name="collection_id"
                 value="{{COLLECTION_ID}}"
               />
-              {% if REQUEST_ID %}
+              {% if REQUEST_ID and HIDE %}
               <input type="hidden" name="request_id" value="{{REQUEST_ID}}" />
               {% endif %}
               <button class="btn btn-success">Run</button>
             </div>
-            {% include "components/load_tests/log.html" %}
           </section>
         </form>
       </div>

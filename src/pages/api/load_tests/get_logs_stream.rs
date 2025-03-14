@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, Responder, web};
 use futures::{StreamExt, stream};
-use std::convert::Infallible;
+use std::{collections::VecDeque, convert::Infallible, sync::Mutex};
 use tokio_stream::wrappers::BroadcastStream;
 
 use crate::{app_state::AppState, utils::monitor_logs::get_or_create_channel};
@@ -11,17 +11,34 @@ pub async fn logs_stream(state: web::Data<AppState>, path: web::Path<i32>) -> im
         .await
         .subscribe();
 
+    // Mutex-wrapped VecDeque to store the last 500 log lines
+    let logs_buffer = web::Data::new(Mutex::new(VecDeque::with_capacity(500)));
+
     let initial_msg = stream::once(async move {
         Ok::<_, Infallible>(web::Bytes::from(
-            "event: message\ndata: Initializing log...\n\n",
+            "data: <pre><code>Initializing log...</code></pre>\n\n",
         ))
     });
 
-    let stream = BroadcastStream::new(channel).map(|msg| {
-        Ok::<web::Bytes, Infallible>(match msg {
-            Ok(msg) => web::Bytes::from(format!("event: message\ndata: {}\n\n", msg).to_string()),
-            Err(_) => web::Bytes::from("data: Unknown error\n\n".to_string()),
-        })
+    let stream = BroadcastStream::new(channel).map(move |msg| {
+        let mut buffer = logs_buffer.lock().unwrap();
+
+        match msg {
+            Ok(msg) => {
+                // Push new message
+                buffer.push_back(msg.clone());
+
+                // Remove old messages if over 500
+                if buffer.len() > 500 {
+                    buffer.pop_front();
+                }
+
+                Ok::<web::Bytes, Infallible>(web::Bytes::from(format!("{}\n\n", msg)))
+            }
+            Err(_) => Ok(web::Bytes::from(
+                "data: <pre><code>Unknown error</code></pre>\n\n",
+            )),
+        }
     });
 
     let final_stream = initial_msg.chain(stream);
