@@ -9,7 +9,7 @@
         type="radio"
         name="body_type"
         class="radio radio-sm radio-neutral"
-        {%if BODY_TYPE == method or not request and loop.index==1 %}checked{%endif%}
+        {%if BODY_TYPE == method %}checked{%endif%}
         value="application/json"
       />
       <span>{{method}}</span>
