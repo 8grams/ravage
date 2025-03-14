@@ -40,7 +40,8 @@
             {%elif requests %}
 
             <div>
-              <div role="alert" class="alert">
+              <label class="text-lg font-semibold">Request List</label>
+              <div role="alert" class="alert mt-4">
                 <span class="material-symbols-rounded" style="font-size: 20px"
                   >info</span
                 >
@@ -49,7 +50,6 @@
                   you can't change body_content or content_type</span
                 >
               </div>
-              <label class="text-lg font-semibold">Request List</label>
               <div class="tabs tabs-box mt-4">
                 <!-- prettier-ignore -->
                 {% for request in requests %}
@@ -70,7 +70,7 @@
             </div>
             {%endif%}
             <!-- separator -->
-            {% if not REQUEST_ID or not requests %}
+            {% if not REQUEST_ID and not requests %}
             <div>
               <div role="alert" class="alert">
                 <span class="material-symbols-rounded" style="font-size: 20px"

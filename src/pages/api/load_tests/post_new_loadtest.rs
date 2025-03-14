@@ -11,7 +11,9 @@ use crate::models::load_test::NewLoadTest;
 use crate::models::request::Request;
 use crate::models::request_header::RequestHeader;
 use crate::services::get_collection::{get_collection_headers, get_single_collection};
-use crate::services::get_request::{get_request_headers, get_single_request};
+use crate::services::get_request::{
+    get_collection_requests, get_request_headers, get_single_request,
+};
 use crate::services::goose_closure::{GooseLoadConfig, LoadConfig, goose_closure_load_test};
 use crate::services::loadtest_services::insert_loadtest;
 use crate::utils::monitor_logs::get_or_create_channel;
@@ -55,10 +57,17 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             .collect();
     }
     let mut requests: Vec<(Request, Vec<RequestHeader>)> = Vec::new();
-    if let Ok(req) = get_single_request(conn, request_id).await {
-        let hdrs = get_request_headers(conn, req.id).await.unwrap();
-        requests.push((req.clone(), hdrs));
-    };
+    if request_id != 0 {
+        if let Ok(req) = get_single_request(conn, request_id).await {
+            let hdrs = get_request_headers(conn, req.id).await.unwrap();
+            requests.push((req.clone(), hdrs));
+        };
+    } else {
+        for req in get_collection_requests(conn, collection_id).await.unwrap() {
+            let hdrs = get_request_headers(conn, req.id).await.unwrap();
+            requests.push((req.clone(), hdrs));
+        }
+    }
     if !requests.is_empty() && request_id != 0 {
         let mut request = requests.first().unwrap().clone();
         if let Some(body_type) = json_data.body_type {
