@@ -1,10 +1,14 @@
+<p align="center">
+    <img alt="Ravage" src="https://raw.githubusercontent.com/8grams/ravage/refs/heads/develop/assets/icon.png" height="200">
+</p>
+
 # Ravage
 
-A load test suite based on Goose.
+A load test suite based on [Goose](https://github.com/tag1consulting/goose/).
 
 ## Background
 
-Goose is an excellent load testing tool. It is lightweight, fast, and highly efficient compared to other tools like JMeter and Locust. However, one major drawback of Goose is its lack of a graphical user interface (GUI), which can be particularly challenging for non-engineering teams, such as QA teams. Running load tests with Goose requires knowledge of the Rust programming language, which many QA professionals may not have.
+<strong>Goose</strong> is an excellent load testing tool. It is lightweight, fast, and highly efficient compared to other tools like JMeter and Locust. However, one major drawback of Goose is its lack of a graphical user interface (GUI), which can be particularly challenging for non-engineering teams, such as QA teams. Running load tests with Goose requires knowledge of the Rust programming language, which many QA professionals may not have.
 
 The goal of this project is to provide a simple and user-friendly GUI that enables users to leverage Goose for load testing without requiring any Rust programming expertise.
 
