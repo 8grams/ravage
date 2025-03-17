@@ -2,6 +2,7 @@ use actix_web::{Scope, web};
 use get_load_test_from::get_load_test_from;
 
 mod get_load_test_from;
+mod get_log_stream_ws;
 mod get_logs_stream;
 mod post_new_loadtest;
 
