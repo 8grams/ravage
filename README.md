@@ -19,6 +19,17 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 - [HTMX](https://htmx.org/) and [AlpineJS](https://alpinejs.dev/) as JS Framework
 - [Tailwind](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) as CSS Framework
 
+## Run on Production
+
+The fastest way to get started is by using Docker. First, create `.env` file, then run:
+
+```
+docker run -v .:/opt/data -p 80:80 ghcr.io/8grams/ravage
+```
+
+Once the container is running, open your browser and go to `http://localhost:80`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
+It's very recommended to use Reverse Proxy like Nginx.
+
 ## Local Development
 
 ### Pre-requisites
@@ -61,14 +72,16 @@ make migrate-up
 make dev
 ```
 
-## Run on Production
+## Concept
 
-The fastest way to get started is by using Docker. First, create `.env` file, then run:
+### Request
 
-```
-docker run -v .:/opt/data -p 80:80 ghcr.io/8grams/ravage
-```
+A Request represents an HTTP request to an endpoint. A Request is associated with a single path. The base path/URL is defined in the collection. It inherits all HTTP headers defined in its collection, but we can override them or define request-specific headers.
 
-Once the container is running, open your browser and go to `http://localhost:8080`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
-It's very recommended to use Reverse Proxy like Nginx.
+### Collection
 
+A Collection is a group of Requests. A Collection is associated with a single Host or Base URL. It has its own default HTTP headers, which will be inherited by Requests.
+
+### Load Test
+
+We can create a Load Test from a Request or a Collection. If we create a Load Test from a Collection, it will use all associated Requests to attack the target.
