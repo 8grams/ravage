@@ -24,7 +24,7 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 The fastest way to get started is by using Docker. First, create `.env` file, then run:
 
 ```
-docker run -v .:/opt/data -p 80:80 ghcr.io/8grams/ravage
+docker run -v .:/opt/data -p 80:80 --env-file .env ghcr.io/8grams/ravage
 ```
 
 Once the container is running, open your browser and go to `http://localhost:80`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
@@ -48,16 +48,10 @@ cp .env.template .env
 
 ### Initialize dependencies
 
-Run
+Initialize
 
 ```bash
 make init
-```
-
-Install Diesel
-
-```
-make diesel-install
 ```
 
 Run migration
@@ -66,7 +60,7 @@ Run migration
 make migrate-up
 ```
 
-### Run Application
+Run Application
 
 ```bash
 make dev
@@ -85,3 +79,7 @@ A Collection is a group of Requests. A Collection is associated with a single Ho
 ### Load Test
 
 We can create a Load Test from a Request or a Collection. If we create a Load Test from a Collection, it will use all associated Requests to attack the target.
+
+## License
+
+MIT
