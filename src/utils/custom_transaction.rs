@@ -1,6 +1,7 @@
 use goose::{goose::GooseResponse, prelude::*};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::pin::Pin;
+use std::time::Duration;
 
 use crate::{
     models::{request::Request, request_header::RequestHeader},
@@ -35,7 +36,24 @@ async fn perform_request(
         }
     }
 
-    let builder = reqwest::Client::builder();
+    let builder = reqwest::Client::builder()
+        .pool_max_idle_per_host(0)  // Disable connection pooling
+        .pool_idle_timeout(None)    // Keep connections alive
+        .tcp_nodelay(true)          // Disable Nagle's algorithm
+        .tcp_keepalive(Some(Duration::from_secs(60)))  // Enable TCP keepalive
+        .http2_prior_knowledge()    // Enable HTTP/2
+        .gzip(true)                // Enable gzip compression
+        .timeout(Duration::from_secs(30))  // Set timeout
+        .pool_max_idle_per_host(100)  // Increase connection pool size
+        .http1_title_case_headers(true)  // Optimize HTTP/1 headers
+        .http1_preserve_header_case(true)  // Preserve header case
+        .http1_only(false)  // Allow HTTP/2
+        .use_rustls_tls()  // Use rustls for better performance
+        .http2_initial_connection_window_size(1024 * 1024)  // Increase initial connection window size
+        .http2_initial_stream_window_size(1024 * 1024)  // Increase initial stream window size
+        .http2_max_concurrent_streams(100)  // Increase max concurrent streams
+        .http2_max_frame_size(16384)  // Set max frame size
+        .http2_max_header_list_size(262144);  // Increase max header list size
 
     if let Some((req, headers)) = request {
         for h in headers {
@@ -86,10 +104,12 @@ async fn perform_request(
         };
         match result {
             Ok(r) => {
-                let _ = sender.send(format!(
-                    "data: <pre><code>✅ Success {}</code></pre>\n\n",
-                    r.response.unwrap().status()
-                ));
+                if let Some(response) = r.response {
+                    let _ = sender.send(format!(
+                        "data: <pre><code>✅ Success {}</code></pre>\n\n",
+                        response.status()
+                    ));
+                }
             }
             Err(e) => {
                 let _ = sender.send(format!(
@@ -109,10 +129,12 @@ async fn perform_request(
         let result = user.get("").await;
         match result {
             Ok(r) => {
-                let _ = sender.send(format!(
-                    "data: <pre><code>✅ Success {}<code></pre>\n\n",
-                    r.response.unwrap().status()
-                ));
+                if let Some(response) = r.response {
+                    let _ = sender.send(format!(
+                        "data: <pre><code>✅ Success {}<code></pre>\n\n",
+                        response.status()
+                    ));
+                }
             }
             Err(e) => {
                 let _ = sender.send(format!(
