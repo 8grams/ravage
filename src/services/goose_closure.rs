@@ -14,6 +14,7 @@ pub struct LoadConfig {
     pub launch_all_users: usize,
     pub total_users: usize,
     pub timeout: String,
+    pub hatch_rate: String,
     pub runtime: usize,
     pub log_path: String,
     pub report_path: String,
@@ -73,10 +74,12 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
             GooseDefault::RequestLog,
             config.load_config.log_path.as_str(),
         )?
-        .set_default(
-            GooseDefault::StartupTime,
-            config.load_config.launch_all_users,
-        )?
+        // .set_default(
+        //     GooseDefault::StartupTime,
+        //     config.load_config.launch_all_users,
+        // )?
+        .set_default(GooseDefault::Timeout, config.load_config.timeout)?
+        .set_default(GooseDefault::HatchRate, config.load_config.hatch_rate)?
         .set_default(GooseDefault::Users, config.load_config.total_users)?
         .set_default(GooseDefault::RunTime, config.load_config.runtime)?
         .set_default(GooseDefault::StickyFollow, config.load_config.follow)?;
