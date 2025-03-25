@@ -46,11 +46,9 @@ async fn perform_request(
         .timeout(Duration::from_secs(30))  // Set timeout
         .pool_max_idle_per_host(100)  // Increase connection pool size
         .http1_title_case_headers()  // Optimize HTTP/1 headers
-        .http1_only(false)  // Allow HTTP/2
         .use_rustls_tls()  // Use rustls for better performance
         .http2_initial_connection_window_size(1024 * 1024)  // Increase initial connection window size
         .http2_initial_stream_window_size(1024 * 1024)  // Increase initial stream window size
-        .http2_max_concurrent_streams(100)  // Increase max concurrent streams
         .http2_max_frame_size(16384)  // Set max frame size
         .http2_max_header_list_size(262144);  // Increase max header list size
 
