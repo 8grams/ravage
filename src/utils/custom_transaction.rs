@@ -45,8 +45,7 @@ async fn perform_request(
         .gzip(true)                // Enable gzip compression
         .timeout(Duration::from_secs(30))  // Set timeout
         .pool_max_idle_per_host(100)  // Increase connection pool size
-        .http1_title_case_headers(true)  // Optimize HTTP/1 headers
-        .http1_preserve_header_case(true)  // Preserve header case
+        .http1_title_case_headers()  // Optimize HTTP/1 headers
         .http1_only(false)  // Allow HTTP/2
         .use_rustls_tls()  // Use rustls for better performance
         .http2_initial_connection_window_size(1024 * 1024)  // Increase initial connection window size
