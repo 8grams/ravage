@@ -83,7 +83,7 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         // .set_default(GooseDefault::ThrottleRequests, 0)?
         // .set_default(GooseDefault::NoStatusCodes, true)?
         // .set_default(GooseDefault::RunningMetrics, 1)?
-        .set_default(GooseDefault::NoResetMetrics, true)?
+        .set_default(GooseDefault::NoResetMetrics, true)?;
         // .set_default(GooseDefault::NoMetrics, false)?
         // .set_default(GooseDefault::NoErrorSummary, false)?
         // .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
