@@ -43,8 +43,8 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
     let config_clone = config.clone();
 
     let mut scenario = scenario!("WebsiteUser")
-        // After each transaction runs, sleep randomly from 5 to 15 seconds.
-        .set_wait_time(Duration::from_secs(5), Duration::from_secs(15))?;
+        // After each transaction runs, sleep randomly from 0.01 to 0.1 seconds.
+        .set_wait_time(Duration::from_millis(10), Duration::from_millis(100))?;
 
     // if request
     if let Some(requests) = config.requests.clone() {
@@ -74,15 +74,25 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
             GooseDefault::RequestLog,
             config.load_config.log_path.as_str(),
         )?
-        // .set_default(
-        //     GooseDefault::StartupTime,
-        //     config.load_config.launch_all_users,
-        // )?
         .set_default(GooseDefault::Timeout, config.load_config.timeout.as_str())?
         .set_default(GooseDefault::HatchRate, config.load_config.hatch_rate.as_str())?
         .set_default(GooseDefault::Users, config.load_config.total_users)?
         .set_default(GooseDefault::RunTime, config.load_config.runtime)?
-        .set_default(GooseDefault::StickyFollow, config.load_config.follow)?;
+        .set_default(GooseDefault::StickyFollow, config.load_config.follow)?
+        // Performance optimizations
+        .set_default(GooseDefault::ThrottleRequests, 0)?
+        .set_default(GooseDefault::StatusCodes, true)?
+        .set_default(GooseDefault::PrintStats, 1)?
+        .set_default(GooseDefault::RunningMetrics, 1)?
+        .set_default(GooseDefault::NoResetMetrics, true)?
+        .set_default(GooseDefault::NoMetrics, false)?
+        .set_default(GooseDefault::NoHashCheck, true)?
+        .set_default(GooseDefault::NoTaskMetrics, false)?
+        .set_default(GooseDefault::NoErrorSummary, false)?
+        .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
+        .set_default(GooseDefault::NoAutoStop, true)?   // Prevent auto-stop
+        .set_default(GooseDefault::NoResetStats, true)? // Prevent stats reset
+        .set_default(GooseDefault::NoExit, true)?;      // Prevent auto-exit
 
     let result = goose.execute().await;
 

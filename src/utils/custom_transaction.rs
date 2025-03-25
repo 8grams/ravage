@@ -1,6 +1,7 @@
 use goose::{goose::GooseResponse, prelude::*};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::pin::Pin;
+use std::time::Duration;
 
 use crate::{
     models::{request::Request, request_header::RequestHeader},
@@ -35,7 +36,13 @@ async fn perform_request(
         }
     }
 
-    let builder = reqwest::Client::builder();
+    let builder = reqwest::Client::builder()
+        .pool_max_idle_per_host(0)  // Disable connection pooling
+        .pool_idle_timeout(None)    // Keep connections alive
+        .tcp_nodelay(true)          // Disable Nagle's algorithm
+        .tcp_keepalive(Some(Duration::from_secs(60)))  // Enable TCP keepalive
+        .http2_prior_knowledge()    // Enable HTTP/2
+        .gzip(true);               // Enable gzip compression
 
     if let Some((req, headers)) = request {
         for h in headers {
