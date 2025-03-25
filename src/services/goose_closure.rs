@@ -81,18 +81,12 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         .set_default(GooseDefault::StickyFollow, config.load_config.follow)?
         // Performance optimizations
         .set_default(GooseDefault::ThrottleRequests, 0)?
-        .set_default(GooseDefault::StatusCodes, true)?
-        .set_default(GooseDefault::PrintStats, 1)?
+        .set_default(GooseDefault::NoStatusCodes, true)?
         .set_default(GooseDefault::RunningMetrics, 1)?
         .set_default(GooseDefault::NoResetMetrics, true)?
         .set_default(GooseDefault::NoMetrics, false)?
-        .set_default(GooseDefault::NoHashCheck, true)?
-        .set_default(GooseDefault::NoTaskMetrics, false)?
         .set_default(GooseDefault::NoErrorSummary, false)?
         .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
-        .set_default(GooseDefault::NoAutoStop, true)?   // Prevent auto-stop
-        .set_default(GooseDefault::NoResetStats, true)? // Prevent stats reset
-        .set_default(GooseDefault::NoExit, true)?;      // Prevent auto-exit
 
     let result = goose.execute().await;
 
