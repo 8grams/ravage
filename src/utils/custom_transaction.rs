@@ -104,11 +104,19 @@ async fn perform_request(
         };
         match result {
             Ok(r) => {
-                if let Some(response) = r.response {
-                    let _ = sender.send(format!(
-                        "data: <pre><code>✅ Success {}</code></pre>\n\n",
-                        response.status()
-                    ));
+                match r.response {
+                    Ok(response) => {
+                        let _ = sender.send(format!(
+                            "data: <pre><code>✅ Success {}</code></pre>\n\n",
+                            response.status()
+                        ));
+                    }
+                    Err(e) => {
+                        let _ = sender.send(format!(
+                            "data: <pre><code>❌ Response error: {}</code></pre>\n\n",
+                            e
+                        ));
+                    }
                 }
             }
             Err(e) => {
@@ -129,11 +137,19 @@ async fn perform_request(
         let result = user.get("").await;
         match result {
             Ok(r) => {
-                if let Some(response) = r.response {
-                    let _ = sender.send(format!(
-                        "data: <pre><code>✅ Success {}<code></pre>\n\n",
-                        response.status()
-                    ));
+                match r.response {
+                    Ok(response) => {
+                        let _ = sender.send(format!(
+                            "data: <pre><code>✅ Success {}</code></pre>\n\n",
+                            response.status()
+                        ));
+                    }
+                    Err(e) => {
+                        let _ = sender.send(format!(
+                            "data: <pre><code>❌ Response error: {}</code></pre>\n\n",
+                            e
+                        ));
+                    }
                 }
             }
             Err(e) => {
