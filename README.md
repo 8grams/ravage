@@ -15,6 +15,7 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 ## Tech Stack
 
 - [Rust](https://www.rust-lang.org/) as main programming language
+- SqLite as a database
 - [Goose](https://github.com/tag1consulting/goose) as the load testing tool behind the scenes
 - [HTMX](https://htmx.org/) and [AlpineJS](https://alpinejs.dev/) as JS Framework
 - [Tailwind](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) as CSS Framework
