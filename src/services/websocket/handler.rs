@@ -1,11 +1,7 @@
-use futures_util::{
-    StreamExt as _,
-    future::{self, Either},
-};
 use std::time::{Duration, Instant};
 use tokio::{sync::mpsc, time::interval};
 
-use super::server::{LogServer, LogServerHandler};
+use super::{server::LogServer, server_handler::LogServerHandler};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 
