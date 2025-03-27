@@ -7,6 +7,7 @@ use app_state::AppState;
 use dotenvy::dotenv;
 use futures::lock::Mutex;
 use pages::index;
+use services::websocket::server::LogServer;
 use std::{collections::HashMap, env, sync::Arc};
 
 mod app_state;
@@ -28,6 +29,7 @@ pub async fn main() -> std::io::Result<()> {
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
     let log_channels = Arc::new(Mutex::new(HashMap::new()));
+    let (_server, handler) = LogServer::new(0);
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
@@ -51,6 +53,7 @@ pub async fn main() -> std::io::Result<()> {
                 pool: pool.clone(),
                 log_channels: log_channels.clone(),
             }))
+            .app_data(handler.clone())
             .route(
                 "/static/{filename:.*}",
                 web::get().to(embed::serve_static_file),

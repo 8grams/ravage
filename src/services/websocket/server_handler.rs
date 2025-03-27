@@ -6,6 +6,7 @@ use super::{ConnId, Msg, server::Command};
 pub struct LogServerHandler {
     pub cmd_tx: mpsc::UnboundedSender<Command>,
 }
+
 impl LogServerHandler {
     pub async fn connect(&self, conn_tx: mpsc::UnboundedSender<Msg>, log_id: i32) -> ConnId {
         let (res_tx, res_rx) = oneshot::channel();
@@ -19,10 +20,12 @@ impl LogServerHandler {
 
         res_rx.await.unwrap()
     }
+
     pub fn disconnect(&self, conn: ConnId) {
-        self.cmd_tx.send(Command::Disconnect { conn }).unwrap();
+        let _ = self.cmd_tx.send(Command::Disconnect { conn });
     }
-    pub async fn send_msesage(&self, log_id: i32, msg: impl Into<Msg>) {
+
+    pub async fn send_message(&self, log_id: i32, msg: impl Into<Msg>) {
         let (res_tx, res_rx) = oneshot::channel();
         self.cmd_tx
             .send(Command::Message {
@@ -31,6 +34,6 @@ impl LogServerHandler {
                 res_tx,
             })
             .unwrap();
-        res_rx.await.unwrap();
+        let _ = res_rx.await;
     }
 }

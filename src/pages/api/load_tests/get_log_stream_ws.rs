@@ -1,37 +1,19 @@
-use actix_web::{rt, HttpRequest, HttpResponse, Responder, web};
-use actix_ws::Message;
-use actix_ws::AggregatedMessage;
-use futures_util::StreamExt;
+use actix_web::{HttpRequest, HttpResponse, Responder, web};
+
+use crate::services::websocket::{handler::log_ws, server_handler::LogServerHandler};
 
 pub async fn log_stream_ws(
     req: HttpRequest,
-    body: web::Payload,
-    path: web::Path<i32>
+    stream: web::Payload,
+    path: web::Path<i32>,
+    srv: web::Data<LogServerHandler>,
 ) -> actix_web::Result<impl Responder> {
-    let (response, mut session, mut msg_stream) = actix_ws::handle(&req, body)?;
-    let mut stream = msg_stream.aggregate_continuations()
-        .max_continuation_size(2_usize.pow(20));
-    rt::spawn(async move{
-        while let Some(msg) = stream.next().await{
-            match msg {
-                Ok(AggregatedMessage::Text(text)) => {
-                    // echo text message
-                    session.text(text).await.unwrap();
-                },
+    let log_id = path.into_inner();
+    let (res, session, msg_stream) = match actix_ws::handle(&req, stream) {
+        Ok(parts) => parts,
+        Err(err) => return Ok(HttpResponse::from_error(err)),
+    };
 
-                Ok(AggregatedMessage::Binary(bin)) => {
-                    // echo binary message
-                    session.binary(bin).await.unwrap();
-                },
-
-                Ok(AggregatedMessage::Ping(msg)) => {
-                    // respond to PING frame with PONG frame
-                    session.pong(&msg).await.unwrap();
-                },
-
-                _ => {}
-            }
-        }
-    });
-    Ok(response)
+    tokio::task::spawn_local(log_ws(srv.get_ref().clone(), session, msg_stream, log_id));
+    Ok(res)
 }
