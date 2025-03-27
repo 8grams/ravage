@@ -52,8 +52,8 @@ pub async fn main() -> std::io::Result<()> {
                 tera: tera_tmpl.clone(),
                 pool: pool.clone(),
                 log_channels: log_channels.clone(),
+                log_server: handler.clone(),
             }))
-            .app_data(handler.clone())
             .route(
                 "/static/{filename:.*}",
                 web::get().to(embed::serve_static_file),

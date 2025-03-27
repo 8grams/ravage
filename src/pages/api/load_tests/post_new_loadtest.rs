@@ -16,7 +16,7 @@ use crate::services::get_request::{
 };
 use crate::services::goose_closure::{GooseLoadConfig, LoadConfig, goose_closure_load_test};
 use crate::services::loadtest_services::insert_loadtest;
-use crate::utils::monitor_logs::get_or_create_channel;
+use crate::services::websocket::server_handler::LogServerHandler;
 
 #[derive(Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct JsonData {
@@ -129,7 +129,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
     .unwrap();
 
     ctx.insert("LOADTEST_ID", &lt.id);
-    let sender = get_or_create_channel(&state, lt.id).await;
+    let sender = state.log_server.clone();
     let timeout = json_data.timeout.unwrap_or("100".into());
     let hatch_rate = json_data.hatch_rate.unwrap_or("100".into());
     let launch_all_users: usize = json_data

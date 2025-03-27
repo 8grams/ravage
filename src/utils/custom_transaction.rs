@@ -37,20 +37,20 @@ async fn perform_request(
     }
 
     let builder = reqwest::Client::builder()
-        .pool_max_idle_per_host(0)  // Disable connection pooling
-        .pool_idle_timeout(None)    // Keep connections alive
-        .tcp_nodelay(true)          // Disable Nagle's algorithm
-        .tcp_keepalive(Some(Duration::from_secs(60)))  // Enable TCP keepalive
-        .http2_prior_knowledge()    // Enable HTTP/2
-        .gzip(true)                // Enable gzip compression
-        .timeout(Duration::from_secs(30))  // Set timeout
-        .pool_max_idle_per_host(100)  // Increase connection pool size
-        .http1_title_case_headers()  // Optimize HTTP/1 headers
-        .use_rustls_tls()  // Use rustls for better performance
-        .http2_initial_connection_window_size(1024 * 1024)  // Increase initial connection window size
-        .http2_initial_stream_window_size(1024 * 1024)  // Increase initial stream window size
-        .http2_max_frame_size(16384)  // Set max frame size
-        .http2_max_header_list_size(262144);  // Increase max header list size
+        .pool_max_idle_per_host(0) // Disable connection pooling
+        .pool_idle_timeout(None) // Keep connections alive
+        .tcp_nodelay(true) // Disable Nagle's algorithm
+        .tcp_keepalive(Some(Duration::from_secs(60))) // Enable TCP keepalive
+        .http2_prior_knowledge() // Enable HTTP/2
+        .gzip(true) // Enable gzip compression
+        .timeout(Duration::from_secs(30)) // Set timeout
+        .pool_max_idle_per_host(100) // Increase connection pool size
+        .http1_title_case_headers() // Optimize HTTP/1 headers
+        .use_rustls_tls() // Use rustls for better performance
+        .http2_initial_connection_window_size(1024 * 1024) // Increase initial connection window size
+        .http2_initial_stream_window_size(1024 * 1024) // Increase initial stream window size
+        .http2_max_frame_size(16384) // Set max frame size
+        .http2_max_header_list_size(262144); // Increase max header list size
 
     if let Some((req, headers)) = request {
         for h in headers {
@@ -64,10 +64,13 @@ async fn perform_request(
         let _ = user
             .set_client_builder(builder.default_headers(header_map))
             .await;
-        let _ = sender.send(format!(
-            "data: <pre><code>🔄 User {}: {} {}</code></pre>\n\n",
-            user.weighted_users_index, req.method, req.path
-        ));
+        let _ = sender.send_message(
+            config.collection.id,
+            format!(
+                "<pre><code>🔄 User {}: {} {}</code></pre>\n\n",
+                user.weighted_users_index, req.method, req.path
+            ),
+        );
         let result: Result<GooseResponse, _> = match req.method.to_uppercase().as_str() {
             "POST" => {
                 if let Some(body_type) = req.body_type {
@@ -100,60 +103,65 @@ async fn perform_request(
             _ => user.get(&req.path).await,
         };
         match result {
-            Ok(r) => {
-                match r.response {
-                    Ok(response) => {
-                        let _ = sender.send(format!(
-                            "data: <pre><code>✅ Success {}</code></pre>\n\n",
+            Ok(r) => match r.response {
+                Ok(response) => {
+                    let _ = sender.send_message(
+                        config.collection.id,
+                        format!(
+                            "<pre><code>✅ Success {}</code></pre>\n\n",
                             response.status()
-                        ));
-                    }
-                    Err(e) => {
-                        let _ = sender.send(format!(
-                            "data: <pre><code>❌ Response error: {}</code></pre>\n\n",
-                            e
-                        ));
-                    }
+                        ),
+                    );
                 }
-            }
+                Err(e) => {
+                    let _ = sender.send_message(
+                        config.collection.id,
+                        format!("<pre><code>❌ Response error: {}</code></pre>\n\n", e),
+                    );
+                }
+            },
             Err(e) => {
-                let _ = sender.send(format!(
-                    "data: <pre><code>❌ Failed, message: {}</code></pre>\n\n",
-                    e
-                ));
+                let _ = sender.send_message(
+                    config.collection.id,
+                    format!("<pre><code>❌ Failed, message: {}</code></pre>\n\n", e),
+                );
             }
         }
     } else {
         let _ = user
             .set_client_builder(builder.default_headers(header_map))
             .await;
-        let _ = sender.send(format!(
-            "data: <code>🔄 User {}: GET {}</code>\n\n",
-            user.weighted_users_index, user.base_url
-        ));
+        let _ = sender.send_message(
+            config.collection.id,
+            format!(
+                "<code>🔄 User {}: GET {}</code>\n\n",
+                user.weighted_users_index, user.base_url
+            ),
+        );
         let result = user.get("").await;
         match result {
-            Ok(r) => {
-                match r.response {
-                    Ok(response) => {
-                        let _ = sender.send(format!(
-                            "data: <pre><code>✅ Success {}</code></pre>\n\n",
+            Ok(r) => match r.response {
+                Ok(response) => {
+                    let _ = sender.send_message(
+                        config.collection.id,
+                        format!(
+                            "<pre><code>✅ Success {}</code></pre>\n\n",
                             response.status()
-                        ));
-                    }
-                    Err(e) => {
-                        let _ = sender.send(format!(
-                            "data: <pre><code>❌ Response error: {}</code></pre>\n\n",
-                            e
-                        ));
-                    }
+                        ),
+                    );
                 }
-            }
+                Err(e) => {
+                    let _ = sender.send_message(
+                        config.collection.id,
+                        format!("<pre><code>❌ Response error: {}</code></pre>\n\n", e),
+                    );
+                }
+            },
             Err(e) => {
-                let _ = sender.send(format!(
-                    "data: <pre><code>❌ Error, message: {}</code></pre>\n\n",
-                    e
-                ));
+                let _ = sender.send_message(
+                    config.collection.id,
+                    format!("<pre><code>❌ Error, message: {}</code></pre>\n\n", e),
+                );
             }
         }
     }

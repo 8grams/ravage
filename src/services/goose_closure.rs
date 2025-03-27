@@ -8,6 +8,8 @@ use crate::{
     utils::custom_transaction::loadtest_transaction_wrapper,
 };
 
+use super::websocket::server_handler::LogServerHandler;
+
 #[derive(Clone)]
 pub struct LoadConfig {
     pub follow: bool,
@@ -23,7 +25,7 @@ pub struct LoadConfig {
 #[derive(Clone)]
 pub struct GooseLoadConfig {
     pub load_config: LoadConfig,
-    pub sender: tokio::sync::broadcast::Sender<String>,
+    pub sender: LogServerHandler,
     pub collection: Collection,
     pub requests: Option<Vec<(Request, Vec<RequestHeader>)>>,
     pub headers: Option<Vec<Header>>,
@@ -33,7 +35,10 @@ pub async fn goose_closure_load_test(config: GooseLoadConfig) {
     tokio::spawn(async move {
         if let Err(e) = run_loadtest(config.clone()).await {
             let sender = config.sender;
-            let _ = sender.send(format!("data: Goose load test failed: {}", e));
+            let _ = sender.send_message(
+                config.collection.id,
+                format!("Goose load test failed: {}", e),
+            );
             eprintln!("Goose load test failed: {}", e);
         }
     });
@@ -75,7 +80,10 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
             config.load_config.log_path.as_str(),
         )?
         // .set_default(GooseDefault::Timeout, config.load_config.timeout.as_str())?
-        .set_default(GooseDefault::HatchRate, config.load_config.hatch_rate.as_str())?
+        .set_default(
+            GooseDefault::HatchRate,
+            config.load_config.hatch_rate.as_str(),
+        )?
         .set_default(GooseDefault::Users, config.load_config.total_users)?
         .set_default(GooseDefault::RunTime, config.load_config.runtime)?
         // .set_default(GooseDefault::StickyFollow, config.load_config.follow)?
@@ -84,25 +92,28 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         // .set_default(GooseDefault::NoStatusCodes, true)?
         // .set_default(GooseDefault::RunningMetrics, 1)?
         .set_default(GooseDefault::NoResetMetrics, true)?;
-        // .set_default(GooseDefault::NoMetrics, false)?
-        // .set_default(GooseDefault::NoErrorSummary, false)?
-        // .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
+    // .set_default(GooseDefault::NoMetrics, false)?
+    // .set_default(GooseDefault::NoErrorSummary, false)?
+    // .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
 
     let result = goose.execute().await;
 
     let sender = config.sender;
     match result {
         Ok(metrics) => {
-            let _ = sender.send(format!(
-                "event: ending\ndata: <pre><code>✅ Load test completed in {}s with {} users</code></pre>",
-                metrics.duration, metrics.total_users
-            ));
+            let _ = sender.send_message(
+                config.collection.id,
+                format!(
+                    "<pre><code>✅ Load test completed in {}s with {} users</code></pre>",
+                    metrics.duration, metrics.total_users
+                ),
+            );
         }
         Err(error) => {
-            let _ = sender.send(format!(
-                "event: ending\ndata: <pre><code>❌ Loadtest failed: {}</code></pre>",
-                error
-            ));
+            let _ = sender.send_message(
+                config.collection.id,
+                format!("<pre><code>❌ Loadtest failed: {}</code></pre>", error),
+            );
         }
     }
     Ok(())
