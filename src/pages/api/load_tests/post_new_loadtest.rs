@@ -16,7 +16,6 @@ use crate::services::get_request::{
 };
 use crate::services::goose_closure::{GooseLoadConfig, LoadConfig, goose_closure_load_test};
 use crate::services::loadtest_services::insert_loadtest;
-use crate::services::websocket::server_handler::LogServerHandler;
 
 #[derive(Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct JsonData {
