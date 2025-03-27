@@ -1,5 +1,3 @@
-use futures::io;
-use rand::Rng;
 use std::collections::{HashMap, HashSet};
 use tokio::sync::{mpsc, oneshot};
 
@@ -26,7 +24,6 @@ pub enum Command {
 pub struct LogServer {
     session: HashMap<ConnId, mpsc::UnboundedSender<Msg>>,
     rooms: HashMap<RoomId, HashSet<ConnId>>,
-    cmd_rx: mpsc::UnboundedReceiver<Command>,
 }
 
 impl LogServer {
@@ -34,13 +31,12 @@ impl LogServer {
         let mut rooms = HashMap::with_capacity(4);
         rooms.insert(room, HashSet::new());
 
-        let (cmd_tx, cmd_rx) = mpsc::unbounded_channel();
+        let (cmd_tx, _cmd_rx) = mpsc::unbounded_channel();
 
         (
             Self {
                 session: HashMap::new(),
                 rooms,
-                cmd_rx,
             },
             LogServerHandler { cmd_tx },
         )

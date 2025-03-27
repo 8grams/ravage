@@ -1,4 +1,4 @@
-use actix_ws::{Message, MessageStream, Session};
+use actix_ws::{MessageStream, Session};
 use futures_util::StreamExt;
 use std::time::{Duration, Instant};
 use tokio::{sync::mpsc, time::interval};
@@ -14,7 +14,7 @@ pub async fn log_ws(
     mut msg_stream: MessageStream,
     log_id: i32,
 ) {
-    let mut last_heartbeat = Instant::now();
+    let last_heartbeat = Instant::now();
     let mut interval = interval(HEARTBEAT_INTERVAL);
 
     let (conn_tx, mut conn_rx) = mpsc::unbounded_channel();
