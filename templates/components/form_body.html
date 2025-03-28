@@ -1,28 +1,44 @@
 <fieldset class="fieldset">
-  <legend class="fieldset-legend text-base">Body</legend>
-  <div class="flex gap-4">
-    {% set methods = ["application/json", "application/x-www-form-urlencoded"]
-    %} {% for method in methods %}
-    <label>
-      <!-- prettier-ignore -->
-      <input
+    <legend class="fieldset-legend text-base">Body</legend>
+    <div class="flex gap-4">
+        {% set methods = ["application/json",
+        "application/x-www-form-urlencoded"] %} {% for method in methods %}
+        <label>
+            <!-- prettier-ignore -->
+            <input
         type="radio"
         name="body_type"
         class="radio radio-sm radio-neutral"
         {%if BODY_TYPE == method %}checked{%endif%}
         value="application/json"
       />
-      <span>{{method}}</span>
-    </label>
-    {%endfor%}
-  </div>
-  <div class="mt-4">
-    <!-- prettier-ignore -->
-    <textarea
-      class="textarea w-full"
-      rows="5"
-      placeholder="..."
-      name="body_content"
-    >{{BODY_CONTENT | default(value='')}}</textarea>
-  </div>
+            <span>{{method}}</span>
+        </label>
+        {%endfor%}
+    </div>
+    <div class="mt-4">
+        <div class="border">
+            <textarea class="hidden" id="body_safe_string">
+{{BODY_CONTENT | default(value='')}}</textarea
+            >
+            <div id="editor_container" style="height: 300px"></div>
+        </div>
+    </div>
 </fieldset>
+<script>
+    require.config({
+        paths: {
+            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.22.3/min/vs",
+        },
+    });
+    require(["vs/editor/editor.main"], function () {
+        var content = document.getElementById("body_safe_string").innerText;
+        window.editor = monaco.editor.create(
+            document.getElementById("editor_container"),
+            {
+                value: [content].join("\n"),
+                language: "json",
+            },
+        );
+    });
+</script>
