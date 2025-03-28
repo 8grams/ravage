@@ -1,114 +1,120 @@
 <div>
-  <form
-    hx-post="/api/requests{% if request%}/{{request.id}}{%endif%}?refresh={%if request%}true{%else%}false{%endif%}"
-    hx-ext="json-enc"
-  >
-    <input
-      type="number"
-      class="hidden"
-      name="collection_id"
-      value="{{request.collection_id | default(value=COLLECTION_ID)}}"
-    />
-    <div class="text-end">
-      <button class="btn btn-neutral" type="submit">Save</button>
-      {%if request %}
-      <button
-        class="btn btn-success"
-        type="button"
-        hx-post="/api/requests/{{request.id}}/run"
-        hx-target="#log"
-        hx-swap="innerHTML"
-      >
-        Run
-      </button>
-      {%endif%}
-    </div>
-    <div class="mt-8 space-y-4">
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend text-base">Request Name</legend>
+    <form
+        hx-post="/api/requests{% if request%}/{{request.id}}{%endif%}?refresh={%if request%}true{%else%}false{%endif%}"
+        hx-ext="json-enc"
+        hx-vars="body_content:window.editor.getValue()"
+    >
         <input
-          type="text"
-          class="input w-full"
-          name="name"
-          required
-          placeholder="Request Name"
-          value="{{request.name|default(value='')}}"
+            type="number"
+            class="hidden"
+            name="collection_id"
+            value="{{request.collection_id | default(value=COLLECTION_ID)}}"
         />
-      </fieldset>
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend text-base">Path</legend>
-        <div class="flex gap-2">
-          <input
-            name="path"
-            required
-            type="text"
-            class="input w-full"
-            placeholder="/api/request"
-            pattern="^\/[a-zA-Z0-9-_\/]*$"
-            value="{{request.path|default(value='')}}"
-          />
-          {% set methods = ["GET","POST","PUT","PATCH","DELETE","HEAD"] %}
-          <select class="select w-max" required name="method">
-            <!-- prettier-ignore -->
-            <option disabled {%if not request %}selected{%endif%} value="">METHOD</option>
-            {% for method in methods %}
-            <!-- prettier-ignore -->
-            <option {%if request and request.method == method %}selected{%endif%}>{{method}}</option>
-            {%endfor%}
-          </select>
+        <div class="text-end">
+            <button class="btn btn-neutral" type="submit">Save</button>
+            {%if request %}
+            <button
+                class="btn btn-success"
+                type="button"
+                hx-post="/api/requests/{{request.id}}/run"
+                hx-target="#log"
+                hx-swap="innerHTML"
+            >
+                Run
+            </button>
+            {%endif%}
         </div>
-      </fieldset>
-      {% if default_headers %}
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend text-base">Collection Headers</legend>
-        {% for header in default_headers %}
-        <div class="flex gap-2">
-          <label class="floating-label">
-            <span>Key</span>
-            <input
-              type="text"
-              placeholder="Key"
-              class="input input-bordered"
-              value="{{header.key}}"
-              readonly
-            />
-          </label>
-          <label class="floating-label">
-            <span>Value</span>
-            <input
-              type="text"
-              placeholder="Value"
-              class="input input-bordered"
-              value="{{header.value}}"
-              readonly
-            />
-          </label>
+        <div class="mt-8 space-y-4">
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-base">Request Name</legend>
+                <input
+                    type="text"
+                    class="input w-full"
+                    name="name"
+                    required
+                    placeholder="Request Name"
+                    value="{{request.name|default(value='')}}"
+                />
+            </fieldset>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-base">Path</legend>
+                <div class="flex gap-2">
+                    <input
+                        name="path"
+                        required
+                        type="text"
+                        class="input w-full"
+                        placeholder="/api/request"
+                        pattern="^\/[a-zA-Z0-9-_\/]*$"
+                        value="{{request.path|default(value='')}}"
+                    />
+                    {% set methods =
+                    ["GET","POST","PUT","PATCH","DELETE","HEAD"] %}
+                    <select class="select w-max" required name="method">
+                        <!-- prettier-ignore -->
+                        <option disabled {%if not request %}selected{%endif%} value="">METHOD</option>
+                        {% for method in methods %}
+                        <!-- prettier-ignore -->
+                        <option {%if request and request.method == method %}selected{%endif%}>{{method}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+            </fieldset>
+            {% if default_headers %}
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-base">
+                    Collection Headers
+                </legend>
+                {% for header in default_headers %}
+                <div class="flex gap-2">
+                    <label class="floating-label">
+                        <span>Key</span>
+                        <input
+                            type="text"
+                            placeholder="Key"
+                            class="input input-bordered"
+                            value="{{header.key}}"
+                            readonly
+                        />
+                    </label>
+                    <label class="floating-label">
+                        <span>Value</span>
+                        <input
+                            type="text"
+                            placeholder="Value"
+                            class="input input-bordered"
+                            value="{{header.value}}"
+                            readonly
+                        />
+                    </label>
+                </div>
+                {%endfor%}
+                <p class="fieldset-label">
+                    Collection headers can be overridden
+                </p>
+            </fieldset>
+            {%endif%}
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend text-base">Headers</legend>
+                {% include "components/form_header.html" %}
+            </fieldset>
+            <!-- separator -->
+            {% set BODY_TYPE = request.body_type |
+            default(value='application/json') %}
+            <!-- separator -->
+            {% set BODY_CONTENT = request.body_content | default(value='') %}
+            <!-- separator -->
+            {% include "components/form_body.html" %}
         </div>
-        {%endfor%}
-        <p class="fieldset-label">Collection headers can be overridden</p>
-      </fieldset>
-      {%endif%}
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend text-base">Headers</legend>
-        {% include "components/form_header.html" %}
-      </fieldset>
-      <!-- separator -->
-      {% set BODY_TYPE = request.body_type | default(value='application/json')
-      %}
-      <!-- separator -->
-      {% set BODY_CONTENT = request.body_content | default(value='') %}
-      <!-- separator -->
-      {% include "components/form_body.html" %}
-    </div>
-  </form>
-  {% if request %}
-  <legend class="fieldset-legend text-base">Response</legend>
-  <textarea
-    id="log"
-    readonly
-    placeholder="..."
-    class="textarea w-full mt-2"
-    rows="5"
-  ></textarea>
-  {% endif %}
+    </form>
+    {% if request %}
+    <legend class="fieldset-legend text-base">Response</legend>
+    <textarea
+        id="log"
+        readonly
+        placeholder="..."
+        class="textarea w-full mt-2"
+        rows="5"
+    ></textarea>
+    {% endif %}
 </div>

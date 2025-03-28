@@ -97,7 +97,7 @@
               {% if REQUEST_ID and HIDE %}
               <input type="hidden" name="request_id" value="{{REQUEST_ID}}" />
               {% endif %}
-              <button class="btn btn-success">Run</button>
+              <button hx-vars="body:window.editor.getValue()" type="submit" class="btn btn-success">Run</button>
             </div>
           </section>
         </form>
