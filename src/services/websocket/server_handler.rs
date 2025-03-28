@@ -1,6 +1,5 @@
+use super::{ConnId, Msg, RoomId, server::Command};
 use tokio::sync::{mpsc, oneshot};
-
-use super::{ConnId, Msg, server::Command};
 
 #[derive(Debug, Clone)]
 pub struct LogServerHandler {
@@ -8,32 +7,41 @@ pub struct LogServerHandler {
 }
 
 impl LogServerHandler {
-    pub async fn connect(&self, conn_tx: mpsc::UnboundedSender<Msg>, log_id: i32) -> ConnId {
+    pub async fn connect(&self, conn_tx: mpsc::UnboundedSender<Msg>, log_id: RoomId) -> ConnId {
         let (res_tx, res_rx) = oneshot::channel();
-        self.cmd_tx
+        if self
+            .cmd_tx
             .send(Command::Connect {
                 conn_tx,
                 res_tx,
                 log_id,
             })
-            .unwrap();
-
-        res_rx.await.unwrap()
+            .is_err()
+        {
+            eprintln!("Failed to send connect command");
+            return 0;
+        }
+        res_rx.await.unwrap_or(0)
     }
 
-    pub fn disconnect(&self, conn: ConnId) {
-        let _ = self.cmd_tx.send(Command::Disconnect { conn });
+    pub fn disconnect(&self, conn: ConnId, log_id: RoomId) {
+        let _ = self.cmd_tx.send(Command::Disconnect { conn, log_id });
     }
 
-    pub async fn send_message(&self, log_id: i32, msg: impl Into<Msg>) {
+    pub async fn send_message(&self, log_id: RoomId, msg: impl Into<Msg>) {
         let (res_tx, res_rx) = oneshot::channel();
-        self.cmd_tx
+        if self
+            .cmd_tx
             .send(Command::Message {
                 log_id,
                 msg: msg.into(),
                 res_tx,
             })
-            .unwrap();
+            .is_err()
+        {
+            eprintln!("Failed to send message");
+            return;
+        }
         let _ = res_rx.await;
     }
 }

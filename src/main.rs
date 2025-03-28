@@ -29,7 +29,7 @@ pub async fn main() -> std::io::Result<()> {
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
     let log_channels = Arc::new(Mutex::new(HashMap::new()));
-    let (_server, handler) = LogServer::new(0);
+    let (server, handler) = LogServer::new();
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
@@ -58,6 +58,7 @@ pub async fn main() -> std::io::Result<()> {
                 "/static/{filename:.*}",
                 web::get().to(embed::serve_static_file),
             )
+            .route("/test", web::get().to(pages::test::test_page))
             .route("/ping", web::get().to(pages::ping::main))
             .route("/", web::get().to(index::main_pages))
             .service(pages::login::login_page())

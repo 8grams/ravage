@@ -3,11 +3,18 @@
         <div
             class="max-h-96 overflow-y-auto"
             hx-ext="ws"
-            data-id="{{LOADTEST_ID}}"
-            ws-connect="/api/load_tests/{{LOADTEST_ID}}/logs/ws"
+            ws-connect="/api/logs/{{LOADTEST_ID}}"
             hx-on::after-swap="this.scrollTop = this.scrollHeight"
+            id="logs"
         >
             <pre><code>Loadtest running!! Please wait, it takes time.</code></pre>
         </div>
     </div>
 </div>
+<script>
+    function initObserve() {
+        let logEl = document.getElementById("logs");
+        observer.observe(logEl, config);
+    }
+    initObserve();
+</script>

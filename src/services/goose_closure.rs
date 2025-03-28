@@ -27,6 +27,7 @@ pub struct GooseLoadConfig {
     pub load_config: LoadConfig,
     pub sender: LogServerHandler,
     pub collection: Collection,
+    pub load_test_id: i32,
     pub requests: Option<Vec<(Request, Vec<RequestHeader>)>>,
     pub headers: Option<Vec<Header>>,
 }
@@ -36,7 +37,7 @@ pub async fn goose_closure_load_test(config: GooseLoadConfig) {
         if let Err(e) = run_loadtest(config.clone()).await {
             let sender = config.sender;
             let _ = sender.send_message(
-                config.collection.id,
+                config.load_test_id,
                 format!("Goose load test failed: {}", e),
             );
             eprintln!("Goose load test failed: {}", e);
@@ -99,21 +100,31 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
     let result = goose.execute().await;
 
     let sender = config.sender;
+    let _ = sender
+        .send_message(
+            config.load_test_id,
+            format!(
+                "<div id='logs' hx-swap-oob='beforeend'><pre><code>initializing {} users states...</code></pre></div>",
+                config.load_config.total_users
+            )
+            .to_string(),
+        )
+        .await;
     match result {
         Ok(metrics) => {
             let _ = sender.send_message(
-                config.collection.id,
+                config.load_test_id,
                 format!(
-                    "<pre><code>✅ Load test completed in {}s with {} users</code></pre>",
+                    "<div id='logs' hx-swap-oob='beforeend'><pre><code>✅ Load test completed in {}s with {} users</code></pre></div>",
                     metrics.duration, metrics.total_users
                 ),
-            );
+            ).await;
         }
         Err(error) => {
             let _ = sender.send_message(
-                config.collection.id,
-                format!("<pre><code>❌ Loadtest failed: {}</code></pre>", error),
-            );
+                config.load_test_id,
+                format!("<div id='logs' hx-swap-oob='beforeend'><pre><code>❌ Loadtest failed: {}</code></pre></div>", error),
+            ).await;
         }
     }
     Ok(())

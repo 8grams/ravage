@@ -1,0 +1,20 @@
+{% extends "base/base_app.html" %} {% block content %}
+<div class="container mx-auto">
+    <h1>Websocket Test</h1>
+
+    <div class="mockup-code w-full" hx-ext="ws" ws-connect="/api/logs/test">
+        <div
+            class="max-h-96 overflow-y-auto"
+            hx-on::after-request="console.log('success')"
+            id="logs"
+        ></div>
+    </div>
+    <!-- prettier-ignore -->
+    <script>
+        (() => {
+            let logEl = document.getElementById("logs");
+            observer.observe(logEl, config);
+        })
+    </script>
+</div>
+{%endblock content%}

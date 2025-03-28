@@ -14,7 +14,7 @@ pub async fn log_ws(
     mut msg_stream: MessageStream,
     log_id: i32,
 ) {
-    let last_heartbeat = Instant::now();
+    let mut last_heartbeat = Instant::now();
     let mut interval = interval(HEARTBEAT_INTERVAL);
 
     let (conn_tx, mut conn_rx) = mpsc::unbounded_channel();
@@ -22,28 +22,42 @@ pub async fn log_ws(
 
     loop {
         tokio::select! {
-            // Handle messages from the server and send them to the client
             Some(msg) = conn_rx.recv() => {
-                if session.text(msg).await.is_err() {
-                    break; // Stop on error
+                println!("📝 Attempting to send message to client: {}", msg);
+                match session.text(msg).await {
+                    Ok(_) => println!("✅ Message successfully sent to client."),
+                    Err(err) => {
+                        eprintln!("❌ Failed to send message to client: {:?}", err);
+                        break;
+                    }
                 }
             }
-
-            // Ignore messages from the client
-            Some(_) = msg_stream.next() => {
-                // Clients cannot send messages, so we ignore them
+            Some(msg) = msg_stream.next() => {
+                if let Ok(msg) = msg {
+                    match msg {
+                        actix_ws::Message::Pong(_) => {
+                            println!("🔄 Received pong from client, resetting timeout.");
+                            last_heartbeat = Instant::now();
+                        }
+                        actix_ws::Message::Text(text) => {
+                            println!("📥 Received message from client: {}", text);
+                            // Optionally, you can forward received messages to other clients or process them
+                        }
+                        _ => println!("📥 Received other message from client"),
+                    }
+                }
             }
-
-            // Send heartbeat and check for timeouts
             _ = interval.tick() => {
                 if last_heartbeat.elapsed() > CLIENT_TIMEOUT {
-                    break; // Close connection if no heartbeat response
+                    println!("💀 Client timeout, closing connection");
+                    break;
                 }
-                let _ = session.ping(b"").await;
+                println!("💓 Sending heartbeat ping");
+                let _ = session.ping(b" ").await;
             }
         }
     }
 
-    log_server.disconnect(conn_id);
+    log_server.disconnect(conn_id, log_id);
     let _ = session.close(None).await;
 }

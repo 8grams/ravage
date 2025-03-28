@@ -65,12 +65,12 @@ async fn perform_request(
             .set_client_builder(builder.default_headers(header_map))
             .await;
         let _ = sender.send_message(
-            config.collection.id,
+            config.load_test_id,
             format!(
-                "<pre><code>🔄 User {}: {} {}</code></pre>\n\n",
+                "<div id='logs' hx-swap-oob='beforeend'><pre><code>🔄 User {}: {} {}</code></pre></div>",
                 user.weighted_users_index, req.method, req.path
             ),
-        );
+        ).await;
         let result: Result<GooseResponse, _> = match req.method.to_uppercase().as_str() {
             "POST" => {
                 if let Some(body_type) = req.body_type {
@@ -106,25 +106,25 @@ async fn perform_request(
             Ok(r) => match r.response {
                 Ok(response) => {
                     let _ = sender.send_message(
-                        config.collection.id,
+                        config.load_test_id,
                         format!(
-                            "<pre><code>✅ Success {}</code></pre>\n\n",
+                            "<div id='logs' hx-swap-oob='beforeend'><pre><code>✅ Success {}</code></pre></div>",
                             response.status()
                         ),
-                    );
+                    ).await;
                 }
                 Err(e) => {
                     let _ = sender.send_message(
-                        config.collection.id,
-                        format!("<pre><code>❌ Response error: {}</code></pre>\n\n", e),
-                    );
+                        config.load_test_id,
+                        format!("<div id='logs' hx-swap-oob='beforeend'><pre><code>❌ Response error: {}</code></pre></div>", e),
+                    ).await;
                 }
             },
             Err(e) => {
                 let _ = sender.send_message(
-                    config.collection.id,
-                    format!("<pre><code>❌ Failed, message: {}</code></pre>\n\n", e),
-                );
+                    config.load_test_id,
+                    format!("<div id='logs' hx-swap-oob='beforeend'><pre><code>❌ Failed, message: {}</code></pre></div>", e),
+                ).await;
             }
         }
     } else {
@@ -132,36 +132,36 @@ async fn perform_request(
             .set_client_builder(builder.default_headers(header_map))
             .await;
         let _ = sender.send_message(
-            config.collection.id,
+            config.load_test_id,
             format!(
-                "<code>🔄 User {}: GET {}</code>\n\n",
+                "<div id='logs' hx-swap-oob='beforeend'><pre><code>🔄 User {}: GET {}</code></pre></div>",
                 user.weighted_users_index, user.base_url
             ),
-        );
+        ).await;
         let result = user.get("").await;
         match result {
             Ok(r) => match r.response {
                 Ok(response) => {
                     let _ = sender.send_message(
-                        config.collection.id,
+                        config.load_test_id,
                         format!(
-                            "<pre><code>✅ Success {}</code></pre>\n\n",
+                            "<div id='logs' hx-swap-oob='beforeend'><pre><code>✅ Success {}</code></pre></div>",
                             response.status()
                         ),
-                    );
+                    ).await;
                 }
                 Err(e) => {
                     let _ = sender.send_message(
-                        config.collection.id,
-                        format!("<pre><code>❌ Response error: {}</code></pre>\n\n", e),
+                        config.load_test_id,
+                        format!("<div id='logs' hx-swap-oob='beforeend'><pre><code>❌ Response error: {}</code></pre></div>", e),
                     );
                 }
             },
             Err(e) => {
                 let _ = sender.send_message(
-                    config.collection.id,
-                    format!("<pre><code>❌ Error, message: {}</code></pre>\n\n", e),
-                );
+                    config.load_test_id,
+                    format!("<div id='logs' hx-swap-oob='beforeend'><pre><code>❌ Error, message: {}</code></pre></div>", e),
+                ).await;
             }
         }
     }

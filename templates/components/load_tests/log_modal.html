@@ -1,12 +1,19 @@
 <div class="modal-wrapper">
-  <input type="checkbox" id="log_modal" class="modal-toggle" checked />
-  <div class="modal" role="dialog">
-    <div class="modal-box max-w-5xl">
-      <h3 class="text-lg font-bold">Log</h3>
-      <div class="py-4">{% include "components/load_tests/log.html" %}</div>
-      <div class="modal-action">
-        <label for="log_modal" class="btn">Close!</label>
-      </div>
+    <input type="checkbox" id="log_modal" class="modal-toggle" checked />
+    <div class="modal" role="dialog">
+        <div class="modal-box max-w-5xl">
+            <h3 class="text-lg font-bold">Log</h3>
+            <div class="py-4">
+                {% include "components/load_tests/log.html" %}
+            </div>
+            <div class="modal-action">
+                <label
+                    for="log_modal"
+                    class="btn"
+                    onclick="observer.disconnect()"
+                    >Close!</label
+                >
+            </div>
+        </div>
     </div>
-  </div>
 </div>
