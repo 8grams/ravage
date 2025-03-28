@@ -1,11 +1,10 @@
 use actix_web::{HttpResponse, Responder, web};
-use serde::{Deserialize, Serialize};
 
 use crate::{
     app_state::AppState,
     services::{
         get_collection::{get_collection_headers, get_main_collections, get_single_collection},
-        get_request::{get_collection_requests, get_request_headers},
+        get_request::get_collection_requests,
     },
 };
 

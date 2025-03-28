@@ -5,9 +5,11 @@ edition = "2024"
 
 [dependencies]
 futures = "0.3"
+futures-util = { version = "0.3.31" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.140"
 actix-web = "4"
+actix-ws = { version = "0.3.0" }
 tera = "1"
 rust-embed = { version = "8.6.0", features = [
   "compression",
@@ -28,3 +30,4 @@ goose = { version = "0.18.0" }
 html-escape = { version = "0.2.13", default-features = false }
 tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1.17", features = ["sync"] }
+rand = { version = "0.9.0" }

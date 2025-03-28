@@ -7,3 +7,4 @@ pub mod loadtests;
 pub mod login;
 pub mod ping;
 pub mod request;
+pub mod test;

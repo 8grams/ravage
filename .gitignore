@@ -2,6 +2,6 @@
 .env
 db
 tailwindcss
-static/
+static/*
 node_modules
 nix-shell/
