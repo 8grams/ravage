@@ -16,5 +16,5 @@ ${APP_URL} {
         file_server browse
     }
 
-    reverse_proxy / localhost:8080
+    reverse_proxy localhost:8080
 }
