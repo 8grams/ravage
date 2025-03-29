@@ -8,4 +8,4 @@ envsubst < /etc/caddy/Caddyfile > /etc/caddy/Caddyfile.tmp
 mv /etc/caddy/Caddyfile.tmp /etc/caddy/Caddyfile
 
 # Start supervisor in the background
-/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &x
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
