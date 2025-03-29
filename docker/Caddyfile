@@ -11,10 +11,10 @@ ${APP_URL} {
         format json
     }
 
-    reverse_proxy / localhost:8080
-
-    handle_path /data/* {
+    handle /data/* {
         root * /opt
         file_server browse
     }
+
+    reverse_proxy / localhost:8080
 }
