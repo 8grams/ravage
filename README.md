@@ -29,7 +29,12 @@ docker run -v .:/opt/data -p 80:80 --env-file .env ghcr.io/8grams/ravage
 ```
 
 Once the container is running, open your browser and go to `http://localhost:80`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
-It's very recommended to use Reverse Proxy like Nginx.
+
+To use Caddy's Auto TLS feature, set on `.env`
+
+```
+AUTO_HTTPS=on
+```
 
 ## Local Development
 
@@ -80,6 +85,12 @@ A Collection is a group of Requests. A Collection is associated with a single Ho
 ### Load Test
 
 We can create a Load Test from a Request or a Collection. If we create a Load Test from a Collection, it will use all associated Requests to attack the target.
+
+## Demo
+
+For demo: https://ravage.8grams.tech
+
+Login: `admin:admin`
 
 ## License
 

@@ -1,3 +1,6 @@
+//! Main application entry point for the Ravage load testing platform.
+//! This module initializes the web server, database connection, and sets up all routes.
+
 extern crate dotenvy;
 extern crate tera;
 
@@ -20,6 +23,25 @@ pub mod schema;
 pub mod services;
 pub mod utils;
 
+/// Main entry point for the application.
+/// 
+/// This function:
+/// 1. Initializes environment variables
+/// 2. Sets up the database connection pool
+/// 3. Loads Tera templates
+/// 4. Configures the web server with:
+///    - Session management
+///    - Authentication middleware
+///    - Static file serving
+///    - API routes
+///    - Error handling
+/// 
+/// The server can be configured through environment variables:
+/// - `IP_BIND_ADDRESS`: Server IP (default: "127.0.0.1")
+/// - `PORT_BIND_ADDRESS`: Server port (default: "8080")
+/// - `SECRET_KEY`: Session encryption key
+/// 
+/// Returns a Result indicating success or failure of server startup.
 #[actix_web::main]
 pub async fn main() -> std::io::Result<()> {
     dotenv().ok();

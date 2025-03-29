@@ -1,8 +1,35 @@
+//! HTTP request service functions.
+//! This module provides functions for sending HTTP requests using the reqwest client.
+
 use reqwest::{Client, Method, Response};
 use std::{collections::HashMap, error::Error};
 
 use crate::models::{collection::Collection, request::Request};
 
+/// Sends an HTTP request using the reqwest client
+/// 
+/// This function:
+/// 1. Creates a new reqwest client
+/// 2. Constructs the full URL from collection host and request path
+/// 3. Sets up the request with method, headers, and body
+/// 4. Sends the request and returns the response
+/// 
+/// # Arguments
+/// * `request` - The request configuration containing method, path, body type and content
+/// * `collection` - The collection containing the host URL
+/// * `headers` - Optional headers to include in the request
+/// 
+/// # Returns
+/// * `Result<Response, Box<dyn Error>>` - The HTTP response or error if request fails
+/// 
+/// # Supported Methods
+/// * GET
+/// * POST
+/// * PUT
+/// * DELETE
+/// * PATCH
+/// * HEAD
+/// * OPTIONS
 pub async fn send_request(
     request: &Request,
     collection: &Collection,

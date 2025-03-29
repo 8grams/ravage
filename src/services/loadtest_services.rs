@@ -1,3 +1,5 @@
+//! Load test service functions for database operations.
+//! This module provides functions for managing load test records in the database.
 
 use diesel::prelude::*;
 use diesel::{
@@ -10,6 +12,18 @@ use crate::{
     schema::load_tests,
 };
 
+/// Retrieves all load tests from the database, ordered by creation date
+/// 
+/// This function:
+/// 1. Queries the load_tests table
+/// 2. Orders results by creation date in descending order
+/// 3. Returns all load tests as a vector
+/// 
+/// # Arguments
+/// * `conn` - Database connection from the connection pool
+/// 
+/// # Returns
+/// * `Result<Vec<LoadTest>, diesel::result::Error>` - List of load tests or database error
 pub async fn get_loadtests(
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
 ) -> Result<Vec<LoadTest>, diesel::result::Error> {
@@ -19,6 +33,18 @@ pub async fn get_loadtests(
         .get_results(conn)
 }
 
+/// Inserts a new load test record into the database
+/// 
+/// This function:
+/// 1. Inserts the new load test record
+/// 2. Returns the created record with its generated ID
+/// 
+/// # Arguments
+/// * `conn` - Database connection from the connection pool
+/// * `new_loadtest` - New load test record to insert
+/// 
+/// # Returns
+/// * `Result<LoadTest, diesel::result::Error>` - Created load test or database error
 pub async fn insert_loadtest(
     conn: &mut PooledConnection<ConnectionManager<SqliteConnection>>,
     new_loadtest: NewLoadTest,
@@ -29,6 +55,18 @@ pub async fn insert_loadtest(
         .get_result(conn)
 }
 
+/// Updates the log and report paths for a load test
+/// 
+/// This function:
+/// 1. Updates the specified load test record
+/// 2. Sets new paths for logs and reports
+/// 3. Panics if the update fails
+/// 
+/// # Arguments
+/// * `conn` - Database connection
+/// * `loadtest_id` - ID of the load test to update
+/// * `log_path` - New path for the log file
+/// * `report_path` - New path for the report file
 pub async fn update_loadtest(
     conn: &mut SqliteConnection,
     loadtest_id: i32,

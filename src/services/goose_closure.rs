@@ -1,3 +1,6 @@
+//! Goose load testing service implementation.
+//! This module provides functionality for configuring and running load tests using the Goose framework.
+
 use goose::prelude::*;
 use std::{sync::Arc, time::Duration};
 
@@ -7,31 +10,68 @@ use crate::{
     },
     utils::custom_transaction::loadtest_transaction_wrapper,
 };
-
 use super::websocket::server_handler::LogServerHandler;
 
+/// Configuration for load test parameters
+/// 
+/// This struct defines the basic parameters for a load test:
+/// - `follow`: Whether to follow redirects
+/// - `launch_all_users`: Number of users to launch at once
+/// - `total_users`: Total number of users to simulate
+/// - `timeout`: Request timeout duration
+/// - `hatch_rate`: Rate at which to spawn new users
+/// - `runtime`: Total duration of the load test
+/// - `log_path`: Path to store request logs
+/// - `report_path`: Path to store test reports
 #[derive(Clone)]
 pub struct LoadConfig {
+    /// Whether to follow redirects
     pub follow: bool,
+    /// Number of users to launch at once
     pub launch_all_users: usize,
+    /// Total number of users to simulate
     pub total_users: usize,
+    /// Request timeout duration
     pub timeout: String,
+    /// Rate at which to spawn new users
     pub hatch_rate: String,
+    /// Total duration of the load test
     pub runtime: usize,
+    /// Path to store request logs
     pub log_path: String,
+    /// Path to store test reports
     pub report_path: String,
 }
 
+/// Complete configuration for a Goose load test
+/// 
+/// This struct combines load test parameters with additional configuration:
+/// - `load_config`: Basic load test parameters
+/// - `sender`: Channel for sending test progress updates
+/// - `collection`: Collection of requests to test
+/// - `requests`: Optional specific requests to test
+/// - `headers`: Optional global headers to apply
 #[derive(Clone)]
 pub struct GooseLoadConfig {
+    /// Basic load test parameters
     pub load_config: LoadConfig,
     pub sender: LogServerHandler,
     pub collection: Collection,
     pub load_test_id: i32,
     pub requests: Option<Vec<(Request, Vec<RequestHeader>)>>,
+    /// Optional global headers to apply
     pub headers: Option<Vec<Header>>,
 }
 
+/// Launches a Goose load test in a separate task
+/// 
+/// This function:
+/// 1. Spawns a new task for the load test
+/// 2. Handles any errors that occur during the test
+/// 3. Sends error messages through the provided sender
+/// 
+/// # Arguments
+/// * `config` - Complete configuration for the load test
 pub async fn goose_closure_load_test(config: GooseLoadConfig) {
     tokio::spawn(async move {
         if let Err(e) = run_loadtest(config.clone()).await {
@@ -45,6 +85,19 @@ pub async fn goose_closure_load_test(config: GooseLoadConfig) {
     });
 }
 
+/// Executes the Goose load test with the given configuration
+/// 
+/// This function:
+/// 1. Creates a Goose scenario with the configured requests
+/// 2. Sets up the Goose attack with all parameters
+/// 3. Executes the load test
+/// 4. Reports results through the provided sender
+/// 
+/// # Arguments
+/// * `config` - Complete configuration for the load test
+/// 
+/// # Returns
+/// * `Result<(), GooseError>` - Success or failure of the load test
 async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
     let config_clone = config.clone();
 
@@ -52,7 +105,7 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         // After each transaction runs, sleep randomly from 0.01 to 0.1 seconds.
         .set_wait_time(Duration::from_millis(10), Duration::from_millis(100))?;
 
-    // if request
+    // Register transactions based on configuration
     if let Some(requests) = config.requests.clone() {
         for req_n_h in requests {
             let config = config_clone.clone();
@@ -69,6 +122,8 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         let new_scenario = scenario.clone().register_transaction(trans);
         scenario = new_scenario;
     }
+
+    // Configure and start the Goose attack
     let goose = GooseAttack::initialize()?
         .register_scenario(scenario)
         .set_default(GooseDefault::Host, config.collection.host.as_str())?
@@ -87,16 +142,9 @@ async fn run_loadtest(config: GooseLoadConfig) -> Result<(), GooseError> {
         )?
         .set_default(GooseDefault::Users, config.load_config.total_users)?
         .set_default(GooseDefault::RunTime, config.load_config.runtime)?
-        // .set_default(GooseDefault::StickyFollow, config.load_config.follow)?
-        // Performance optimizations
-        // .set_default(GooseDefault::ThrottleRequests, 0)?
-        // .set_default(GooseDefault::NoStatusCodes, true)?
-        // .set_default(GooseDefault::RunningMetrics, 1)?
         .set_default(GooseDefault::NoResetMetrics, true)?;
-    // .set_default(GooseDefault::NoMetrics, false)?
-    // .set_default(GooseDefault::NoErrorSummary, false)?
-    // .set_default(GooseDefault::NoAutoStart, true)?  // Prevent auto-start
 
+    // Execute the load test and report results
     let result = goose.execute().await;
 
     let sender = config.sender;

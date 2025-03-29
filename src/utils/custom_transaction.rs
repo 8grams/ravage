@@ -1,3 +1,6 @@
+//! Custom transaction handling for load testing.
+//! This module provides functionality for executing HTTP requests during load tests with proper error handling and logging.
+
 use goose::{goose::GooseResponse, prelude::*};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::pin::Pin;
@@ -8,6 +11,18 @@ use crate::{
     services::goose_closure::GooseLoadConfig,
 };
 
+/// Wraps a load test transaction with proper error handling and logging
+/// 
+/// This function creates a future that will execute the HTTP request with the given configuration.
+/// It handles both specific requests and default GET requests to the base URL.
+/// 
+/// # Arguments
+/// * `user` - The Goose user executing the transaction
+/// * `config` - Configuration for the load test including headers and logging
+/// * `request` - Optional specific request to execute, or None for default GET
+/// 
+/// # Returns
+/// * `Pin<Box<dyn Future<Output = TransactionResult> + Send + '_>>` - A future that will execute the request
 pub fn loadtest_transaction_wrapper(
     user: &mut GooseUser,
     config: GooseLoadConfig,
@@ -16,6 +31,21 @@ pub fn loadtest_transaction_wrapper(
     Box::pin(perform_request(user, config, request))
 }
 
+/// Performs the actual HTTP request with proper error handling and logging
+/// 
+/// This function:
+/// 1. Sets up HTTP headers from both global and request-specific configurations
+/// 2. Configures the HTTP client with optimized settings for load testing
+/// 3. Executes the request with proper error handling
+/// 4. Logs the results through the provided sender
+/// 
+/// # Arguments
+/// * `user` - The Goose user executing the transaction
+/// * `config` - Configuration for the load test including headers and logging
+/// * `request` - Optional specific request to execute, or None for default GET
+/// 
+/// # Returns
+/// * `TransactionResult` - The result of the transaction execution
 async fn perform_request(
     user: &mut GooseUser,
     config: GooseLoadConfig,
@@ -23,8 +53,10 @@ async fn perform_request(
 ) -> TransactionResult {
     let sender = config.sender.clone();
 
+    // Initialize header map for the request
     let mut header_map: HeaderMap = HeaderMap::new();
 
+    // Add global headers if present
     if let Some(headers) = config.headers {
         for h in headers {
             if let (Ok(header_name), Ok(header_value)) = (
@@ -36,6 +68,7 @@ async fn perform_request(
         }
     }
 
+    // Configure HTTP client with optimized settings
     let builder = reqwest::Client::builder()
         .pool_max_idle_per_host(0) // Disable connection pooling
         .pool_idle_timeout(None) // Keep connections alive
@@ -52,7 +85,9 @@ async fn perform_request(
         .http2_max_frame_size(16384) // Set max frame size
         .http2_max_header_list_size(262144); // Increase max header list size
 
+    // Handle specific request if provided
     if let Some((req, headers)) = request {
+        // Add request-specific headers
         for h in headers {
             if let (Ok(header_name), Ok(header_value)) = (
                 HeaderName::from_bytes(h.key.as_bytes()),
@@ -102,6 +137,7 @@ async fn perform_request(
             "DELETE" => user.delete(&req.path).await,
             _ => user.get(&req.path).await,
         };
+        // Handle response and log results
         match result {
             Ok(r) => match r.response {
                 Ok(response) => {
@@ -128,6 +164,7 @@ async fn perform_request(
             }
         }
     } else {
+        // Handle default GET request to base URL
         let _ = user
             .set_client_builder(builder.default_headers(header_map))
             .await;

@@ -1,18 +1,30 @@
-// use crate::tera_lib::versioning::version;
+//! Module for handling embedded static files and templates.
+//! This module uses the `rust-embed` crate to embed static files and templates into the binary.
+
 use actix_web::{HttpRequest, HttpResponse};
 use rust_embed::RustEmbed;
 use tera::Tera;
 
+/// Embedded template files from the templates directory
 #[derive(RustEmbed)]
 #[folder = "templates"]
 #[include = "*.html"]
 struct TemplateFiles;
 
+/// Embedded static files from the static directory
 #[derive(RustEmbed)]
 #[folder = "static/"]
 struct StaticFiles;
 
-// load templates
+/// Loads and initializes the Tera template engine with embedded templates
+/// 
+/// This function:
+/// 1. Creates a new Tera instance
+/// 2. Iterates over all embedded template files
+/// 3. Loads each template into the Tera engine
+/// 
+/// # Returns
+/// * `Result<Tera, tera::Error>` - The initialized Tera engine or an error if template loading fails
 pub fn load_templates() -> tera::Result<Tera> {
     let mut tera = Tera::default();
     // tera.register_function("version", version);
@@ -30,7 +42,19 @@ pub fn load_templates() -> tera::Result<Tera> {
     Ok(tera)
 }
 
-// Define a custom handler to serve embedded static files
+/// Serves embedded static files with appropriate content types
+/// 
+/// This handler:
+/// 1. Extracts the requested file path
+/// 2. Looks up the file in the embedded static files
+/// 3. Determines the appropriate content type based on file extension
+/// 4. Returns the file with proper headers or a 404 if not found
+/// 
+/// # Arguments
+/// * `req` - The HTTP request containing the requested file path
+/// 
+/// # Returns
+/// * `Result<HttpResponse, actix_web::Error>` - The response containing the file or an error
 pub async fn serve_static_file(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
     // Extract the path requested by the client
     let path = req.match_info().query("filename").to_string();
@@ -50,14 +74,6 @@ pub async fn serve_static_file(req: HttpRequest) -> Result<HttpResponse, actix_w
         };
         let data = content.data;
         Ok(HttpResponse::Ok()
-            // .append_header((
-            //     "Cache-Control",
-            //     if env!("VERGEN_CARGO_DEBUG") == "true" {
-            //         "no-cache"
-            //     } else {
-            //         "private, max-age=2592000, s-maxage=2592000, immutable"
-            //     },
-            // ))
             .append_header(("Service-Worker-Allowed", "/"))
             .content_type(content_type) // Set the appropriate content type
             .body(data))
