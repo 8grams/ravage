@@ -15,17 +15,20 @@ The goal of this project is to provide a simple and user-friendly GUI that enabl
 ## Tech Stack
 
 - [Rust](https://www.rust-lang.org/) as main programming language
-- SqLite as a database
+- SQLite as a database
 - [Goose](https://github.com/tag1consulting/goose) as the load testing tool behind the scenes
 - [HTMX](https://htmx.org/) and [AlpineJS](https://alpinejs.dev/) as JS Framework
 - [Tailwind](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/) as CSS Framework
+- [Caddy](https://caddyserver.com) as Webserver
 
 ## Run on Production
 
 The fastest way to get started is by using Docker. First, create `.env` file, then run:
 
 ```
-docker run -v .:/opt/data -p 80:80 --env-file .env ghcr.io/8grams/ravage
+mkdir data
+mkdir tls
+docker run -v ./data:/opt/data -p 80:80 -v ./tls:/opt/caddy --env-file .env ghcr.io/8grams/ravage
 ```
 
 Once the container is running, open your browser and go to `http://localhost:80`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
@@ -33,7 +36,7 @@ Once the container is running, open your browser and go to `http://localhost:80`
 To use Caddy's Auto TLS feature, set on `.env`
 
 ```
-AUTO_HTTPS=on
+APP_URL=example.com
 ```
 
 ## Local Development

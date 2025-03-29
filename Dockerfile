@@ -57,6 +57,8 @@ COPY ./docker/Caddyfile /etc/caddy/Caddyfile
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./start.sh ./start.sh
 
+ENV XDG_DATA_HOME=/opt
+
 RUN mkdir -p /var/log/supervisor \
     && mkdir -p /opt/data \
     && mkdir -p /var/run/supervisor \

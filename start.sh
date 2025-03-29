@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set default values for environment variables if not set
-export AUTO_HTTPS=${AUTO_HTTPS:-"off"}
+export APP_URL=${APP_URL:-"80:"}
 
 # Process Caddyfile with environment variables
 envsubst < /etc/caddy/Caddyfile > /etc/caddy/Caddyfile.tmp
