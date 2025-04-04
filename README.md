@@ -33,10 +33,14 @@ docker run -v ./data:/opt/data -p 80:80 -v ./tls:/opt/caddy --env-file .env ghcr
 
 Once the container is running, open your browser and go to `http://localhost:80`. Login using `ADMIN_USERNAME` and `ADMIN_PASSWORD` specified in `.env` file.
 
-To use Caddy's Auto TLS feature, set on `.env`
+To use Caddy's Auto TLS feature, set on `.env`, and bind port 443
 
 ```
 APP_URL=example.com
+```
+
+```
+docker run -v ./data:/opt/data -p 80:80 -p 443:443 -v ./tls:/opt/caddy --env-file .env ghcr.io/8grams/ravage
 ```
 
 ## Local Development
