@@ -159,7 +159,7 @@ pub async fn new_loadtest(data: web::Json<JsonData>, state: web::Data<AppState>)
             follow,
             total_users,
         },
-        load_test_id: lt.id.clone(),
+        load_test_id: lt.id,
         sender,
         collection: coll,
         requests: Some(requests),

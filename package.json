@@ -8,5 +8,8 @@
     "dev": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --watch",
     "dev:build:css": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --watch",
     "build:css": "pnpm dlx @tailwindcss/cli -i templates/styles/app.css -o static/app.css --minify"
-  }
+  },
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ]
 }

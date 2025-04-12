@@ -12,14 +12,14 @@ actix-web = "4"
 actix-ws = { version = "0.3.0" }
 tera = "1"
 rust-embed = { version = "8.6.0", features = [
-  "compression",
-  "include-exclude",
+    "compression",
+    "include-exclude",
 ] }
 diesel = { version = "2.2.0", features = [
-  "sqlite",
-  "returning_clauses_for_sqlite_3_35",
-  "r2d2",
-  "chrono",
+    "sqlite",
+    "returning_clauses_for_sqlite_3_35",
+    "r2d2",
+    "chrono",
 ] }
 dotenvy = "0.15.7"
 actix-session = { version = "0.10.1", features = ["cookie-session"] }
