@@ -14,13 +14,18 @@
             <button class="btn btn-neutral" type="submit">Save</button>
             {%if request %}
             <button
-                class="btn btn-success"
+                class="btn btn-success group"
                 type="button"
                 hx-post="/api/requests/{{request.id}}/run"
                 hx-target="#log"
                 hx-swap="innerHTML"
+                hx-on::before-request="this.setAttribute('disabled',true)"
+                hx-on::after-request="this.removeAttribute('disabled')"
             >
-                Run
+                <span class="group-disabled:hidden">Run</span>
+                <span class="hidden group-disabled:inline">
+                    <span class="loading loading-dots loading-xs"></span>
+                </span>
             </button>
             {%endif%}
         </div>
@@ -109,12 +114,13 @@
     </form>
     {% if request %}
     <legend class="fieldset-legend text-base">Response</legend>
-    <textarea
+    <pre><code hx-on::after-settle="hljs.highlightAll();this.scrollIntoView()" class="max-h-96 border rounded-box border-base-300 hljs" id="log"></code></pre>
+    <!-- <textarea
         id="log"
         readonly
         placeholder="..."
         class="textarea w-full mt-2"
         rows="5"
-    ></textarea>
+    ></textarea> -->
     {% endif %}
 </div>
