@@ -36,8 +36,8 @@ pub struct Tab {
 /// * `Vec<Tab>` - List of open tabs, or empty vector if none found
 pub async fn get_session_tabs(session: Session) -> Vec<Tab> {
     if let Some(current) = session.get::<Vec<Tab>>("tabs").unwrap() {
-        return current;
+        current
     } else {
-        return vec![];
-    };
+        vec![]
+    }
 }

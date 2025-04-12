@@ -1,4 +1,3 @@
-use crate::services::websocket::server_handler;
 
 use super::{ConnId, Msg, RoomId, server_handler::LogServerHandler};
 use std::collections::{HashMap, HashSet};
@@ -87,7 +86,7 @@ impl LogServer {
         // Add connection to room
         self.rooms
             .entry(log_id)
-            .or_insert_with(HashSet::new)
+            .or_default()
             .insert(conn_id);
 
         conn_id

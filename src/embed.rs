@@ -62,7 +62,7 @@ pub async fn serve_static_file(req: HttpRequest) -> Result<HttpResponse, actix_w
     // Use the RustEmbed trait to access and serve the embedded files
     if let Some(content) = StaticFiles::get(&path) {
         // Create an HttpResponse with the content from the embedded file
-        let content_type = match path.split('.').last().unwrap() {
+        let content_type = match path.split('.').next_back().unwrap() {
             "css" => "text/css",
             "js" => "text/javascript",
             "png" => "image/png",
