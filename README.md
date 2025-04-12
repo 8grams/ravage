@@ -48,8 +48,9 @@ docker run -v ./data:/opt/data -p 80:80 -p 443:443 -v ./tls:/opt/caddy --env-fil
 ### Pre-requisites
 
 - NodeJS >= 20
-- pnpm
+- bun
 - [Rustup](https://rustup.rs/)
+- sqlite3 (libsqlite3-dev for ubuntu/mint)
 
 ### Prepare
 
