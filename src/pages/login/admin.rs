@@ -1,10 +1,13 @@
-use actix_web::{HttpResponse, Responder, Scope, web};
+use actix_web::{HttpResponse, Responder, web};
 
 use crate::app_state::AppState;
 
-async fn handler(state: web::Data<AppState>, session: actix_session::Session) -> impl Responder {
+pub async fn admin_login_page(
+    state: web::Data<AppState>,
+    session: actix_session::Session,
+) -> impl Responder {
     let ctx = tera::Context::new();
-    let rendered = state.tera.render("pages/login.html", &ctx).unwrap();
+    let rendered = state.tera.render("pages/login/admin.html", &ctx).unwrap();
     let session = session.get::<serde_json::Value>("session").unwrap();
     if session.is_some() {
         return HttpResponse::Found()
@@ -13,8 +16,4 @@ async fn handler(state: web::Data<AppState>, session: actix_session::Session) ->
             .body("Ok");
     }
     HttpResponse::Ok().body(rendered)
-}
-
-pub fn login_page() -> Scope {
-    web::scope("login").route("", web::get().to(handler))
 }
