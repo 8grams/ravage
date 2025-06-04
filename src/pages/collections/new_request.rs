@@ -6,11 +6,16 @@ use crate::{
         get_collection::{get_collection_headers, get_main_collections, get_single_collection},
         get_request::get_collection_requests,
     },
+    utils::tera_context::base_context,
 };
 
-pub async fn new_load_test(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
+pub async fn new_load_test(
+    state: web::Data<AppState>,
+    id: web::Path<i32>,
+    session: actix_session::Session,
+) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     let collection_id = id.into_inner();
 
     if let Ok(hdrs) = get_collection_headers(conn, collection_id).await {

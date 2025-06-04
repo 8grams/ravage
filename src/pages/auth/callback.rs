@@ -1,6 +1,6 @@
 use crate::{AppState, models::user::User, schema::users};
 use actix_session::Session;
-use actix_web::{HttpRequest, HttpResponse, Responder, http::StatusCode, web};
+use actix_web::{HttpResponse, Responder, http::StatusCode, web};
 use diesel::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
