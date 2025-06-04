@@ -1,6 +1,9 @@
 {% extends "base/base_app.html" %} {% block content %} {%if session and
 session.role == "admin" %}
 <main class="container mx-auto px-4 py-10">
+  <div class="flex justify-end">
+    <button class="btn btn-primary">New Users</button>
+  </div>
   <div class="overflow-y-auto">
     <table class="table">
       <thead>
