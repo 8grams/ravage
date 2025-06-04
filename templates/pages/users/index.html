@@ -1,0 +1,36 @@
+{% extends "base/base_app.html" %} {% block content %} {%if session and
+session.role == "admin" %}
+<main class="container mx-auto px-4 py-10">
+  <div class="overflow-y-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role }}</td>
+          <td>
+            <a href="/users/{{ user.id }}/edit" class="btn btn-primary btn-sm"
+              >Edit</a
+            >
+            <a href="/users/{{ user.id }}/delete" class="btn btn-danger btn-sm"
+              >Delete</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+{%else%}
+<p>You don't have permission to view this page.</p>
+{%endif%} {% endblock %}

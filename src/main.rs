@@ -88,6 +88,7 @@ pub async fn main() -> std::io::Result<()> {
             .service(pages::request::request_scope())
             .service(pages::loadtests::loadtest_scope())
             .service(pages::auth::auth_scope())
+            .service(pages::users::users_page_scope())
             .service(pages::api::api_scope())
             .default_service(web::get().to(pages::error_404::main))
     })

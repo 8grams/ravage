@@ -8,3 +8,4 @@ pub mod login;
 pub mod ping;
 pub mod request;
 pub mod test;
+pub mod users;
