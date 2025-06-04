@@ -65,8 +65,8 @@ diesel::table! {
         name -> Text,
         email -> Text,
         role -> Text,
-        created_at -> Text,
-        updated_at -> Text,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
     }
 }
 
