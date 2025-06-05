@@ -10,10 +10,12 @@
     <span>Collection</span>
   </label>
   <div class="tab-content bg-base-100 border-base-300 p-6">
+    <!--prettier-ignore -->
     <button
       hx-get="/api/collections/new"
       hx-swap="innerHTML"
       hx-target="#modal"
+      {% if session and session.role == "viewer" %}disabled{% endif %}
       class="btn btn-neutral w-full"
     >
       <span class="material-symbols-rounded">add</span>
