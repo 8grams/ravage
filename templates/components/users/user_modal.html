@@ -3,7 +3,8 @@
     <h3>{%if user %}Edit{%else%}New{%endif%} User</h3>
     <form
       method="post"
-      hx-post="/api/users/{%if user%}{{user.id}}{%else%}{%endif%}"
+      hx-post="/api/users/{%if user%}{{user.id}}{%else%}{%endif%}?refresh=true"
+      hx-indicator=".progrss-bar"
     >
       <fieldset class="fieldset">
         <label class="fieldset-legend" for="username">Name</label>

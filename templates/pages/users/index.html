@@ -22,13 +22,40 @@ session.role == "admin" %}
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.role }}</td>
-          <td>
-            <a href="/users/{{ user.id }}/edit" class="btn btn-primary btn-sm"
-              >Edit</a
+          <td class="flex justify-end">
+            <button
+              hx-get="/api/users/{{ user.id }}"
+              hx-target="#modal"
+              class="btn btn-primary btn-sm"
             >
-            <a href="/users/{{ user.id }}/delete" class="btn btn-danger btn-sm"
-              >Delete</a
+              Edit
+            </button>
+            {%if session and session.id != user.id%}
+            <dialog class="modal" id="{{user.id}}">
+              <div class="modal-box">
+                <h3 class="text-lg">Delete action</h3>
+                <p class="my-4">Are you sure you want to delete this item?</p>
+                <div class="modal-action">
+                  <button class="btn" onclick="this.closest('.modal').close()">
+                    Cancel
+                  </button>
+                  <button
+                    class="btn btn-error"
+                    hx-delete="/api/users/{{ user.id }}?refresh=true"
+                    hx-indicator=".progrss-bar"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            </dialog>
+            <button
+              class="btn btn-danger btn-sm"
+              onclick="document.getElementById('{{ user.id }}').showModal()"
             >
+              Delete
+            </button>
+            {%endif%}
           </td>
         </tr>
         {% endfor %}
