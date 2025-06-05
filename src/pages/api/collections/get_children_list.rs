@@ -1,14 +1,17 @@
 use crate::{
-    app_state::AppState,
-    models::request::Request,
-    schema::requests,
+    app_state::AppState, models::request::Request, schema::requests,
+    utils::tera_context::base_context,
 };
 use actix_web::{HttpResponse, Responder, web};
 use diesel::prelude::*;
 
-pub async fn children_list(path: web::Path<i32>, state: web::Data<AppState>) -> impl Responder {
+pub async fn children_list(
+    path: web::Path<i32>,
+    state: web::Data<AppState>,
+    session: actix_session::Session,
+) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     let collection_id = path.into_inner();
 
     // if let Ok(cs) = collections::table

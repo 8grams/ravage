@@ -59,6 +59,17 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    users (id) {
+        id -> Integer,
+        name -> Text,
+        email -> Text,
+        role -> Text,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
+    }
+}
+
 diesel::joinable!(collection_headers -> collections (collection_id));
 diesel::joinable!(request_headers -> requests (request_id));
 diesel::joinable!(requests -> collections (collection_id));
@@ -69,4 +80,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     load_tests,
     request_headers,
     requests,
+    users,
 );

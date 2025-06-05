@@ -5,7 +5,12 @@ extern crate dotenvy;
 extern crate tera;
 
 use actix_session::{SessionMiddleware, storage::CookieSessionStore};
-use actix_web::{App, HttpServer, cookie::Key, middleware::Logger, web};
+use actix_web::{
+    App, HttpServer,
+    cookie::Key,
+    middleware::{Logger, NormalizePath},
+    web,
+};
 use app_state::AppState;
 use dotenvy::dotenv;
 use futures::lock::Mutex;
@@ -24,7 +29,7 @@ pub mod services;
 pub mod utils;
 
 /// Main entry point for the application.
-/// 
+///
 /// This function:
 /// 1. Initializes environment variables
 /// 2. Sets up the database connection pool
@@ -35,12 +40,12 @@ pub mod utils;
 ///    - Static file serving
 ///    - API routes
 ///    - Error handling
-/// 
+///
 /// The server can be configured through environment variables:
 /// - `IP_BIND_ADDRESS`: Server IP (default: "127.0.0.1")
 /// - `PORT_BIND_ADDRESS`: Server port (default: "8080")
 /// - `SECRET_KEY`: Session encryption key
-/// 
+///
 /// Returns a Result indicating success or failure of server startup.
 #[actix_web::main]
 pub async fn main() -> std::io::Result<()> {
@@ -51,7 +56,7 @@ pub async fn main() -> std::io::Result<()> {
     let server_address = env::var("IP_BIND_ADDRESS").unwrap_or("127.0.0.1".to_string());
     let server_port = env::var("PORT_BIND_ADDRESS").unwrap_or("8080".to_string());
     let log_channels = Arc::new(Mutex::new(HashMap::new()));
-    let (server, handler) = LogServer::new();
+    let (_server, handler) = LogServer::new();
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let server = HttpServer::new(move || {
@@ -65,6 +70,7 @@ pub async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(logger)
             .wrap(middleware::check_login::CheckLogin)
+            .wrap(NormalizePath::trim())
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
                 secret_key,
@@ -83,11 +89,12 @@ pub async fn main() -> std::io::Result<()> {
             .route("/test", web::get().to(pages::test::test_page))
             .route("/ping", web::get().to(pages::ping::main))
             .route("/", web::get().to(index::main_pages))
-            .service(pages::login::login_page())
+            .service(pages::login::login_scope())
             .service(pages::collections::collections_scope())
             .service(pages::request::request_scope())
             .service(pages::loadtests::loadtest_scope())
             .service(pages::auth::auth_scope())
+            .service(pages::users::users_page_scope())
             .service(pages::api::api_scope())
             .default_service(web::get().to(pages::error_404::main))
     })

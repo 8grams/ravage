@@ -5,7 +5,7 @@ use actix_session::Session;
 use serde::{Deserialize, Serialize};
 
 /// Represents a browser tab in the user's session
-/// 
+///
 /// This struct stores information about an open tab in the user interface:
 /// - `name`: Display name of the tab
 /// - `id`: Optional ID of the item being viewed in the tab
@@ -24,14 +24,14 @@ pub struct Tab {
 }
 
 /// Retrieves the list of open tabs from the user's session
-/// 
+///
 /// This function:
 /// 1. Attempts to get the tabs from the session
 /// 2. Returns an empty vector if no tabs are found
-/// 
+///
 /// # Arguments
 /// * `session` - The user's session
-/// 
+///
 /// # Returns
 /// * `Vec<Tab>` - List of open tabs, or empty vector if none found
 pub async fn get_session_tabs(session: Session) -> Vec<Tab> {
@@ -39,5 +39,19 @@ pub async fn get_session_tabs(session: Session) -> Vec<Tab> {
         current
     } else {
         vec![]
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+pub struct SessionData {
+    pub name: String,
+    pub role: String,
+}
+
+pub async fn get_session_json(session: &actix_session::Session) -> Option<SessionData> {
+    if let Some(current) = session.get::<SessionData>("session").unwrap() {
+        Some(current)
+    } else {
+        None
     }
 }

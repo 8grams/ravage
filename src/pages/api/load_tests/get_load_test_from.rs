@@ -1,7 +1,7 @@
 use actix_web::{HttpResponse, Responder, web};
 use serde::Deserialize;
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, utils::tera_context::base_context};
 
 #[derive(Deserialize)]
 pub struct QueryParams {
@@ -12,9 +12,10 @@ pub struct QueryParams {
 pub async fn get_load_test_from(
     state: web::Data<AppState>,
     params: web::Query<QueryParams>,
+    session: actix_session::Session,
 ) -> impl Responder {
     let query_params = params.into_inner();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     ctx.insert("COLLECTION_ID", &query_params.collection_id);
     if let Some(request_id) = query_params.request_id {
         ctx.insert("REQUEST_ID", &request_id);

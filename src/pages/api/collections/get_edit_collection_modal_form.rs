@@ -2,6 +2,7 @@ use crate::{
     app_state::AppState,
     models::{collection::Collection, collection_header::CollectionHeader},
     schema::{collection_headers, collections},
+    utils::tera_context::base_context,
 };
 use actix_web::{HttpResponse, Responder, web};
 use diesel::prelude::*;
@@ -9,8 +10,9 @@ use diesel::prelude::*;
 pub async fn edit_collection_modal_form(
     state: web::Data<AppState>,
     path: web::Path<i32>,
+    session: actix_session::Session,
 ) -> impl Responder {
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     let conn = &mut state.pool.get().unwrap();
     let c_id = path.into_inner();
 

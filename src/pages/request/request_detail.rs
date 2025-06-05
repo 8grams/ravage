@@ -6,11 +6,16 @@ use crate::{
     models::request::Request,
     schema::requests,
     services::{get_collection::get_main_collections, get_request::get_request_headers},
+    utils::tera_context::base_context,
 };
 
-pub async fn request_detail(path: web::Path<i32>, state: web::Data<AppState>) -> impl Responder {
+pub async fn request_detail(
+    path: web::Path<i32>,
+    state: web::Data<AppState>,
+    session: actix_session::Session,
+) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     let req_id = path.into_inner();
 
     if let Ok(headers) = get_request_headers(conn, req_id).await {

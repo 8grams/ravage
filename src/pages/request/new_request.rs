@@ -11,6 +11,7 @@ pub struct QueryParams {
 pub async fn new_request(
     state: web::Data<AppState>,
     params: web::Query<QueryParams>,
+    session: actix_session::Session,
 ) -> impl Responder {
     let query_params = params.into_inner();
     let conn = &mut state.pool.get().unwrap();

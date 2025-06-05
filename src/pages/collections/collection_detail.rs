@@ -7,6 +7,7 @@ use crate::{
         get_collection::{get_collection_headers, get_main_collections, get_single_collection},
         get_request::{get_collection_requests, get_request_headers},
     },
+    utils::tera_context::base_context,
 };
 
 #[derive(Deserialize)]
@@ -18,9 +19,10 @@ pub async fn collection_detail(
     params: web::Query<QueryParams>,
     state: web::Data<AppState>,
     id: web::Path<i32>,
+    session: actix_session::Session,
 ) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     let query_params = params.into_inner();
     if let Some(request_id) = query_params.request {
         let headers = get_request_headers(conn, request_id).await.unwrap();

@@ -17,7 +17,7 @@ pub async fn login_authentication(
     let password = env::var("ADMIN_PASSWORD").unwrap_or("ravage".to_string());
     let form_data = form_data.into_inner();
     if (form_data.username == username) && (form_data.password == password) {
-        let _ = session.insert("session", json!({ "username": username }));
+        let _ = session.insert("session", json!({ "username": username, "role": "admin" }));
         return HttpResponse::Found()
             .append_header(("Location", "/"))
             .append_header(("Hx-Location", "/"))

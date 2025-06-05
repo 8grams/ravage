@@ -1,11 +1,14 @@
 use actix_web::{HttpResponse, Responder, Scope, web};
 
-use crate::{app_state::AppState, services::loadtest_services::get_loadtests};
+use crate::{
+    app_state::AppState, services::loadtest_services::get_loadtests,
+    utils::tera_context::base_context,
+};
 
-async fn index(state: web::Data<AppState>) -> impl Responder {
+async fn index(state: web::Data<AppState>, session: actix_session::Session) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
     let loadtests = get_loadtests(conn).await.unwrap();
-    let mut ctx = tera::Context::new();
+    let mut ctx = base_context(&session);
     ctx.insert("histories", &loadtests);
     let rendered = state
         .tera
