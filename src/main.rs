@@ -5,7 +5,12 @@ extern crate dotenvy;
 extern crate tera;
 
 use actix_session::{SessionMiddleware, storage::CookieSessionStore};
-use actix_web::{App, HttpServer, cookie::Key, middleware::Logger, web};
+use actix_web::{
+    App, HttpServer,
+    cookie::Key,
+    middleware::{Logger, NormalizePath},
+    web,
+};
 use app_state::AppState;
 use dotenvy::dotenv;
 use futures::lock::Mutex;
@@ -65,6 +70,7 @@ pub async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(logger)
             .wrap(middleware::check_login::CheckLogin)
+            .wrap(NormalizePath::trim())
             .wrap(SessionMiddleware::new(
                 CookieSessionStore::default(),
                 secret_key,

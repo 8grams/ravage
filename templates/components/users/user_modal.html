@@ -1,0 +1,55 @@
+<div class="modal modal-open">
+  <div class="modal-box">
+    <h3>{%if user %}Edit{%else%}New{%endif%} User</h3>
+    <form
+      method="post"
+      hx-post="/api/users/{%if user%}{{user.id}}{%else%}{%endif%}"
+    >
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" for="username">Name</label>
+        <input
+          type="text"
+          name="name"
+          class="input w-full"
+          value="{%if user%}{{user.name}}{%else%}{%endif%}"
+          placeholder="Name"
+          required
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <label class="fieldset-legend" for="username"
+          >Google Account Email</label
+        >
+        <input
+          type="email"
+          name="email"
+          class="input w-full"
+          placeholder="Email"
+          value="{%if user%}{{user.email}}{%else%}{%endif%}"
+          required
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <label class="fieldset-legend">Role</label>
+        <select class="select w-full" name="role" required>
+          <!--prettier-ignore-->
+          <option {%if user and user.role == "viewer"%}selected{%endif%} value="viewer">Viewer</option>
+          <!--prettier-ignore-->
+          <option {%if user and user.role == "editor"%}selected{%endif%} value="editor">Editor</option>
+          <!--prettier-ignore-->
+          <option {%if user and user.role == "admin"%}selected{%endif%} value="admin">Admin</option>
+        </select>
+      </fieldset>
+      <div class="modal-action">
+        <button
+          class="btn"
+          onclick="this.closest('.modal').remove()"
+          type="button"
+        >
+          Cancel
+        </button>
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

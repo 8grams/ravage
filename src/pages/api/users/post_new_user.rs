@@ -9,6 +9,7 @@ pub async fn new_user(
 ) -> impl Responder {
     let conn = &mut state.pool.get().unwrap();
     let session_json = utils::session::get_session_json(&session).await;
+    println!("{:?}", &session_json);
     if session_json.is_some_and(|t| t.role == "admin") {
         let _ = diesel::insert_into(users::table)
             .values(form.into_inner())
