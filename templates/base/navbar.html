@@ -16,7 +16,7 @@
       {%if session%}
       <div class="dropdown dropdown-end">
         <button class="btn pr-1.5">
-          <span> {{session.name}} </span>
+          <span> {{session.name | default(value='user')}} </span>
           <span class="material-symbols-rounded">keyboard_arrow_down</span>
         </button>
         <ul
